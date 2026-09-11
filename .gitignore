@@ -1,0 +1,46 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build
+dist/
+build/
+**/dist/
+**/.vite/
+
+# Env & secrets
+.env
+.env.local
+.env.*.local
+!**/.env.example
+
+# Logs & coverage
+logs/
+*.log
+npm-debug.log*
+coverage/
+.nyc_output/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Uploads & local data
+erp-saas-backend/uploads/*
+!erp-saas-backend/uploads/.gitkeep
+
+# Test / Playwright
+test-results/
+playwright-report/
+blob-report/
+
+# Misc
+*.tsbuildinfo
+.turbo/
+.cache/
+
+# Local notes / agent dumps (not product code)
+**/Claude outputs/

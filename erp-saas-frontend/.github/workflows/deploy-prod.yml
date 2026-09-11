@@ -1,0 +1,50 @@
+name: Deploy Production
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-prod-frontend
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Install, test and build web
+        env:
+          VITE_APP_VERSION: ${{ github.sha }}
+        run: |
+          npm ci
+          npm run typecheck
+          npm run test
+          npm run build
+
+      - name: Upload web artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: domo-web-prod
+          path: dist
+
+  # Conecta tu hosting de producción descomentando y configurando secrets.
+  #
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   environment: production
+  #   steps:
+  #     - uses: actions/download-artifact@v4
+  #       with:
+  #         name: domo-web-prod
+  #     - run: echo "Deploy web to production"
