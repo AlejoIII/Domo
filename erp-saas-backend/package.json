@@ -25,6 +25,7 @@
     "prisma:migrate": "node scripts/run-prisma.js migrate dev",
     "prisma:migrate:deploy": "node scripts/run-prisma.js migrate deploy",
     "prisma:studio": "node scripts/run-prisma.js studio",
+    "db:bootstrap:local": "bash scripts/bootstrap-local-postgres.sh",
     "db:seed": "prisma db seed",
     "migrate:uploads-s3": "npx ts-node scripts/migrate-uploads-to-s3.ts",
     "audit:purge": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} scripts/audit-purge.ts",
