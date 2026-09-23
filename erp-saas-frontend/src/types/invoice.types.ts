@@ -51,6 +51,25 @@ export interface Invoice {
   lines: DocLine[];
   payments?: InvoicePayment[];
   creditNotes?: CreditNoteRef[];
+  verifactu?: {
+    recordId: string;
+    recordType: string;
+    invoiceType?: string | null;
+    aeatStatus: string;
+    aeatCsv?: string | null;
+    huella: string;
+    qrUrl?: string | null;
+    sequenceNo: number;
+    createdAt: string;
+    aeatError?: string | null;
+    records?: Array<{
+      id: string;
+      recordType: string;
+      aeatStatus: string;
+      sequenceNo: number;
+      createdAt: string;
+    }>;
+  } | null;
   createdAt: string;
   updatedAt: string;
 }

@@ -11,6 +11,7 @@ import {
   QUEUE_AUDIT,
   QUEUE_EMAIL,
   QUEUE_EXPORTS,
+  QUEUE_VERIFACTU,
   QUEUE_WEBHOOKS,
 } from './queue.constants';
 
@@ -27,7 +28,7 @@ export function setupBullBoard(app: INestApplication, config: ConfigService) {
   const serverAdapter = new ExpressAdapter();
   serverAdapter.setBasePath('/admin/queues');
 
-  const queues = [QUEUE_WEBHOOKS, QUEUE_AUDIT, QUEUE_EMAIL, QUEUE_EXPORTS]
+  const queues = [QUEUE_WEBHOOKS, QUEUE_AUDIT, QUEUE_EMAIL, QUEUE_EXPORTS, QUEUE_VERIFACTU]
     .map((name) => {
       try {
         return app.get<Queue>(getQueueToken(name));

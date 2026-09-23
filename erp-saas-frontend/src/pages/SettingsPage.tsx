@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Building2, User, Palette, FileText, Bell, Shield, KeyRound, LogOut, Moon, Sun, Check, ScrollText,
-  LayoutGrid, CreditCard, Plug, PanelLeft, FileLock2,
+  LayoutGrid, CreditCard, Plug, PanelLeft, FileLock2, Stamp,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Card } from '@/components/ui/Card';
@@ -19,6 +19,7 @@ import { BillingSettingsSection } from '@/features/settings/BillingSettingsSecti
 import { IntegrationsSettingsSection } from '@/features/settings/IntegrationsSettingsSection';
 import { NavigationSettingsSection } from '@/features/settings/NavigationSettingsSection';
 import { PrivacySettingsSection } from '@/features/settings/PrivacySettingsSection';
+import { VerifactuSettingsSection } from '@/features/settings/VerifactuSettingsSection';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuthStore } from '@/store/auth.store';
 import { useThemeStore } from '@/store/theme.store';
@@ -50,6 +51,7 @@ const tabs = [
   { id: 'profile', label: 'Perfil', icon: User },
   { id: 'company', label: 'Empresa', icon: Building2 },
   { id: 'documents', label: 'Documentos', icon: FileText },
+  { id: 'verifactu', label: 'Verifactu', icon: Stamp },
   { id: 'forms', label: 'Fichas', icon: LayoutGrid },
   { id: 'roles', label: 'Roles', icon: KeyRound },
   { id: 'audit', label: 'Auditoría', icon: ScrollText },
@@ -68,6 +70,7 @@ type TabId = (typeof tabs)[number]['id'];
 const ADMIN_ONLY_TABS = new Set<TabId>([
   'company',
   'documents',
+  'verifactu',
   'forms',
   'roles',
   'audit',
@@ -150,6 +153,13 @@ export function SettingsPage() {
         return <CompanySection canWrite={canWriteSettings} onDirtyChange={setSectionDirty} />;
       case 'documents':
         return <DocumentsSection canWrite={canWriteSettings} onDirtyChange={setSectionDirty} />;
+      case 'verifactu':
+        return (
+          <VerifactuSettingsSection
+            canWrite={canWriteSettings}
+            onDirtyChange={setSectionDirty}
+          />
+        );
       case 'forms':
         return <FormLayoutsSettingsSection />;
       case 'roles':

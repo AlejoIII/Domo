@@ -15,12 +15,15 @@ import {
   QUEUE_EMAIL,
   QUEUE_EXPORTS,
   QUEUE_PREFIX,
+  QUEUE_VERIFACTU,
   QUEUE_WEBHOOKS,
 } from './queue.constants';
 import { AuditProcessor } from './processors/audit.processor';
 import { EmailProcessor } from './processors/email.processor';
 import { ExportProcessor } from './processors/export.processor';
 import { WebhookProcessor } from './processors/webhook.processor';
+import { VerifactuProcessor } from './processors/verifactu.processor';
+import { VerifactuModule } from '../../modules/verifactu/verifactu.module';
 
 function bullImports() {
   return [
@@ -40,6 +43,7 @@ function bullImports() {
       { name: QUEUE_AUDIT, defaultJobOptions: DEFAULT_JOB_OPTIONS },
       { name: QUEUE_EMAIL, defaultJobOptions: DEFAULT_JOB_OPTIONS },
       { name: QUEUE_EXPORTS, defaultJobOptions: DEFAULT_JOB_OPTIONS },
+      { name: QUEUE_VERIFACTU, defaultJobOptions: DEFAULT_JOB_OPTIONS },
     ),
   ];
 }
@@ -70,11 +74,12 @@ export class QueueModule {
       AuditProcessor,
       EmailProcessor,
       ExportProcessor,
+      VerifactuProcessor,
     ];
 
     return {
       module: QueueModule,
-      imports: [...bullImports(), MailModule, ReportsModule],
+      imports: [...bullImports(), MailModule, ReportsModule, VerifactuModule],
       providers: workerProviders,
       exports: [QueueService, ExportStoreService, BullModule, JobHandlerService],
     };

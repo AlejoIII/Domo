@@ -86,12 +86,14 @@ export class MetricsService {
           stats.webhooks.failed +
           stats.audit.failed +
           stats.email.failed +
-          stats.exports.failed;
+          stats.exports.failed +
+          stats.verifactu.failed;
         const waiting =
           stats.webhooks.waiting +
           stats.audit.waiting +
           stats.email.waiting +
-          stats.exports.waiting;
+          stats.exports.waiting +
+          stats.verifactu.waiting;
 
         if (failed >= failedThreshold) {
           alerts.push(`Queue failed jobs: ${failed}`);

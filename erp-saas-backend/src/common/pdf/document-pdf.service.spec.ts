@@ -55,6 +55,21 @@ describe('DocumentPdfService', () => {
     expect(buffer.subarray(0, 5).toString()).toBe('%PDF-');
   });
 
+  it('embeds a Verifactu QR when url is provided', async () => {
+    const buffer = await service.render(buildData({
+      verifactuQrUrl:
+        'https://www2.agenciatributaria.gob.es/wlpl/TIKE-CONT/ValidarQR?nif=B12345678&numserie=FAC-1&fecha=26-07-2026&importe=121.00',
+      verifactuHuella: 'A'.repeat(64),
+      taxBreakdown: [
+        { taxRate: 21, base: 80, taxAmount: 16.8 },
+        { taxRate: 10, base: 20, taxAmount: 2 },
+      ],
+    }));
+
+    expect(buffer.subarray(0, 5).toString()).toBe('%PDF-');
+    expect(buffer.length).toBeGreaterThan(1500);
+  });
+
   it('paginates documents with many lines', async () => {
     const lines = Array.from({ length: 60 }, (_, i) => ({
       description: `Línea de detalle número ${i + 1}`,

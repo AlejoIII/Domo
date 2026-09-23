@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
 import { EmailService } from '../mail/email.service';
-import { runAuditJob, runEmailJob, runWebhookJob } from './job-handlers';
+import { runAuditJob, runEmailJob, runVerifactuJob, runWebhookJob } from './job-handlers';
 import type {
   AuditJobPayload,
   EmailJobPayload,
+  VerifactuJobPayload,
   WebhookJobPayload,
 } from './queue.types';
 
@@ -31,5 +32,13 @@ export class JobHandlerService {
 
   async handleEmail(payload: EmailJobPayload): Promise<void> {
     await runEmailJob(this.email, payload);
+  }
+
+  async handleVerifactu(payload: VerifactuJobPayload): Promise<void> {
+    const { VerifactuRemitService } = await import(
+      '../../modules/verifactu/verifactu-remit.service'
+    );
+    const remit = this.moduleRef.get(VerifactuRemitService, { strict: false });
+    await runVerifactuJob(remit, payload);
   }
 }

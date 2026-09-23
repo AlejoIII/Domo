@@ -27,6 +27,13 @@ export class InvoiceLineDto {
   @IsNumber()
   @Min(0)
   unitPrice!: number;
+
+  @ApiPropertyOptional({ description: 'IVA de la línea; si se omite usa el de cabecera' })
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  taxRate?: number;
 }
 
 export class CreateInvoiceDto {

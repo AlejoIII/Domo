@@ -28,6 +28,7 @@ import { saveEntityWithCustomFields } from '@/lib/save-entity-with-custom-fields
 import { AttachmentsSection } from '@/features/attachments/AttachmentsSection';
 import { InvoicePaymentsSection } from '@/features/invoices/InvoicePaymentsSection';
 import { InvoiceCreditNotesSection } from '@/features/invoices/InvoiceCreditNotesSection';
+import { InvoiceVerifactuSection } from '@/features/invoices/InvoiceVerifactuSection';
 
 export function InvoiceFormPage() {
   const { id } = useParams();
@@ -197,6 +198,7 @@ export function InvoiceFormPage() {
               <InvoicePaymentsSection invoice={invoice} onDirtyChange={setExtraDirty} />
             )}
             <InvoiceCreditNotesSection invoice={invoice} />
+            <InvoiceVerifactuSection invoice={invoice} />
             <AttachmentsSection entityType="invoice" entityId={id} />
           </>
         ) : undefined}

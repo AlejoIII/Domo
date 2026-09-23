@@ -9,8 +9,10 @@ Referencia de todas las variables soportadas. Copia `.env.example` como base.
 | `NODE_ENV` | No | `development` | `development`, `test`, `production` |
 | `PORT` | No | `3000` | Puerto HTTP de la API |
 | `DATABASE_URL` | **Sí** | — | PostgreSQL. Con PgBouncer añade `?pgbouncer=true&connection_limit=10` |
-| `DATABASE_DIRECT_URL` | **Sí** | igual que `DATABASE_URL` | Conexión directa para `prisma migrate` (sin pooler) |
+| `DATABASE_DIRECT_URL` | **Sí*** | igual que `DATABASE_URL` | Conexión directa para `prisma migrate` (sin pooler) |
 | `DATABASE_READ_URL` | No | — | Réplica de lectura; dashboard/informes la usan si está definida |
+
+\*Obligatoria en el schema. Si usas `npm run prisma:migrate:deploy`, se rellena sola con `DATABASE_URL` cuando falta. Sin script: añádela a `.env` (misma URL si no usas PgBouncer).
 
 ## Auth / JWT
 
@@ -112,6 +114,22 @@ Throttling HTTP global usa **Redis** cuando `REDIS_URL` está disponible (multi-
 | `BULL_BOARD_ENABLED` | — | `true` para UI de colas en `/admin/queues` |
 | `BULL_BOARD_TOKEN` | — | Token Bearer o query `?token=` para Bull Board |
 | `LOG_LEVEL` | `info` | Nivel pino: `info`, `debug`, `warn`, `error` |
+
+## Verifactu / SIF (esqueleto)
+
+Ver detalle en `docs/VERIFACTU.md`. Por defecto **desactivado** por empresa (`verifactuEnabled=false`).
+
+| Variable | Default | Descripción |
+|----------|---------|-------------|
+| `VERIFACTU_SECRETS_KEY` | — | Clave ≥32 chars para cifrar certificados en reposo |
+| `VERIFACTU_SOFTWARE_NIF` | `B00000000` | NIF del productor del software (declaración responsable) |
+| `VERIFACTU_SOFTWARE_VERSION` | `1.0.0` | Versión SIF enviada en registros |
+| `VERIFACTU_INSTALLATION_ID` | `1` | Nº instalación del SIF |
+| `VERIFACTU_AEAT_ENABLED` | `false` | Si `true`, el worker intenta remitir |
+| `VERIFACTU_AEAT_DRY_RUN` | `true` | No llama a la red; marca registros como `dry_run` |
+| `VERIFACTU_AEAT_ENV` | `pre` | `pre` \| `prod` |
+| `VERIFACTU_AEAT_URL_PRE` / `_PROD` | URLs AEAT | Override del endpoint SOAP |
+| `VERIFACTU_QR_BASE_URL` | URL AEAT ValidarQR | Base del QR (PDF pendiente) |
 
 Health checks:
 

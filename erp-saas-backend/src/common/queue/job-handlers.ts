@@ -5,6 +5,7 @@ import type { WebhookEvent } from '../../modules/integrations/integrations.const
 import type {
   AuditJobPayload,
   EmailJobPayload,
+  VerifactuJobPayload,
   WebhookJobPayload,
 } from './queue.types';
 
@@ -24,6 +25,13 @@ export async function runAuditJob(
   payload: AuditJobPayload,
 ): Promise<void> {
   await audit.log(payload);
+}
+
+export async function runVerifactuJob(
+  remit: { processRecord(companyId: string, recordId: string): Promise<void> },
+  payload: VerifactuJobPayload,
+): Promise<void> {
+  await remit.processRecord(payload.companyId, payload.recordId);
 }
 
 export async function runEmailJob(
