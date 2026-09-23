@@ -46,7 +46,7 @@ export class VerifactuSettingsService {
   }
 
   async updateSettings(companyId: string, dto: UpdateVerifactuSettingsDto) {
-    if (dto.enabled && dto.mode === 'verifactu' && !this.secrets.isConfigured() && dto.certificatePem) {
+    if (dto.certificatePem && !this.secrets.isConfigured()) {
       throw new BadRequestException(
         'Configura VERIFACTU_SECRETS_KEY en el servidor antes de subir el certificado',
       );
@@ -62,9 +62,6 @@ export class VerifactuSettingsService {
       data.verifactuCertPassEnc = null;
       data.verifactuCertFingerprint = null;
     } else if (dto.certificatePem) {
-      if (!this.secrets.isConfigured()) {
-        throw new BadRequestException('VERIFACTU_SECRETS_KEY no configurada');
-      }
       data.verifactuCertPemEnc = this.secrets.encrypt(dto.certificatePem);
       data.verifactuCertPassEnc = dto.certificatePassword
         ? this.secrets.encrypt(dto.certificatePassword)
@@ -72,10 +69,21 @@ export class VerifactuSettingsService {
       data.verifactuCertFingerprint = this.secrets.fingerprint(dto.certificatePem);
     }
 
-    await this.prisma.company.update({
-      where: { id: companyId },
-      data,
-    });
+    if (Object.keys(data).length === 0) {
+      return this.getSettings(companyId);
+    }
+
+    try {
+      await this.prisma.company.update({
+        where: { id: companyId },
+        data,
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      throw new BadRequestException(
+        `No se pudo guardar Verifactu: ${message}. ¿Aplicaste las migraciones (prisma migrate deploy)?`,
+      );
+    }
 
     return this.getSettings(companyId);
   }

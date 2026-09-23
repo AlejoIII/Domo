@@ -57,7 +57,7 @@ export async function updateVerifactuSettings(payload: {
   certificatePassword?: string;
   clearCertificate?: boolean;
 }): Promise<VerifactuSettings> {
-  const res = await api.patch('/verifactu/settings', payload);
+  const res = await api.patch('/verifactu/settings', payload, { timeout: 20_000 });
   return unwrap<VerifactuSettings>(res.data);
 }
 

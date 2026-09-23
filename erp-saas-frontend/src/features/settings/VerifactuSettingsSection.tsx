@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { Stamp } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -13,6 +14,19 @@ import {
   updateVerifactuSettings,
   type VerifactuSettings,
 } from '@/services/verifactu.service';
+
+function apiErrorMessage(err: unknown): string {
+  if (isAxiosError(err)) {
+    const data = err.response?.data as { message?: string | string[] } | undefined;
+    if (Array.isArray(data?.message)) return data.message.join(', ');
+    if (typeof data?.message === 'string' && data.message.trim()) return data.message;
+    if (err.code === 'ECONNABORTED') return 'Tiempo de espera agotado. ¿Está la API en marcha?';
+    if (!err.response) return 'No hay respuesta del servidor. Revisa que la API escuche en :3000.';
+    return err.message;
+  }
+  if (err instanceof Error) return err.message;
+  return 'No se pudo guardar';
+}
 
 export function VerifactuSettingsSection({
   canWrite,
@@ -36,20 +50,46 @@ export function VerifactuSettingsSection({
   const [nif, setNif] = useState('');
   const [certificatePem, setCertificatePem] = useState('');
   const [certificatePassword, setCertificatePassword] = useState('');
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     const s = settingsQuery.data;
     if (!s) return;
-    setEnabled(s.enabled);
-    setMode(s.mode === 'no_verificable' ? 'no_verificable' : 'verifactu');
-    setNif(s.nif ?? '');
+    const next = {
+      enabled: s.enabled,
+      mode: (s.mode === 'no_verificable' ? 'no_verificable' : 'verifactu') as
+        | 'verifactu'
+        | 'no_verificable',
+      nif: s.nif ?? '',
+    };
+    setEnabled(next.enabled);
+    setMode(next.mode);
+    setNif(next.nif);
+    setHydrated(true);
   }, [settingsQuery.data]);
 
   const draft = { enabled, mode, nif, certificatePem, certificatePassword };
-  const { isDirty, markClean } = useDraftDirty(draft, 'verifactu-settings');
+  const { isDirty, markClean, resetBaseline } = useDraftDirty(
+    draft,
+    hydrated ? 'verifactu-settings-ready' : 'verifactu-settings-loading',
+  );
+
+  useEffect(() => {
+    if (!hydrated || !settingsQuery.data) return;
+    resetBaseline({
+      enabled: settingsQuery.data.enabled,
+      mode: settingsQuery.data.mode === 'no_verificable' ? 'no_verificable' : 'verifactu',
+      nif: settingsQuery.data.nif ?? '',
+      certificatePem: '',
+      certificatePassword: '',
+    });
+    // Solo al hidratar desde servidor la primera vez / cada fetch de settings
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, settingsQuery.dataUpdatedAt]);
 
   useEffect(() => {
     onDirtyChange?.(isDirty);
+    return () => onDirtyChange?.(false);
   }, [isDirty, onDirtyChange]);
 
   const saveMutation = useMutation({
@@ -66,11 +106,23 @@ export function VerifactuSettingsSection({
           : {}),
       }),
     onSuccess: (data: VerifactuSettings) => {
-      markClean();
       setCertificatePem('');
       setCertificatePassword('');
+      const clean = {
+        enabled: data.enabled,
+        mode: (data.mode === 'no_verificable' ? 'no_verificable' : 'verifactu') as
+          | 'verifactu'
+          | 'no_verificable',
+        nif: data.nif ?? '',
+        certificatePem: '',
+        certificatePassword: '',
+      };
+      setEnabled(clean.enabled);
+      setMode(clean.mode);
+      setNif(clean.nif);
+      markClean(clean);
       queryClient.setQueryData(['verifactu', 'settings'], data);
-      queryClient.invalidateQueries({ queryKey: ['verifactu', 'records'] });
+      void queryClient.invalidateQueries({ queryKey: ['verifactu', 'records'] });
     },
   });
 
@@ -79,6 +131,16 @@ export function VerifactuSettingsSection({
       <div className="flex justify-center py-12">
         <Loader />
       </div>
+    );
+  }
+
+  if (settingsQuery.isError) {
+    return (
+      <Card className="border-border/60 p-6">
+        <p className="text-sm text-red-600">
+          No se pudieron cargar los ajustes Verifactu: {apiErrorMessage(settingsQuery.error)}
+        </p>
+      </Card>
     );
   }
 
@@ -175,20 +237,22 @@ export function VerifactuSettingsSection({
           )}
 
           {canWrite && (
-            <div className="flex justify-end">
+            <div className="flex justify-end gap-2">
               <Button
+                type="button"
                 loading={saveMutation.isPending}
-                disabled={!isDirty}
+                disabled={!isDirty || saveMutation.isPending}
                 onClick={() => saveMutation.mutate()}
               >
                 Guardar Verifactu
               </Button>
             </div>
           )}
+          {saveMutation.isSuccess && !isDirty && (
+            <p className="text-sm text-green-700 dark:text-green-400">Ajustes guardados.</p>
+          )}
           {saveMutation.isError && (
-            <p className="text-sm text-red-600">
-              {(saveMutation.error as Error).message || 'No se pudo guardar'}
-            </p>
+            <p className="text-sm text-red-600">{apiErrorMessage(saveMutation.error)}</p>
           )}
         </div>
       </Card>
@@ -197,6 +261,8 @@ export function VerifactuSettingsSection({
         <h3 className="mb-3 font-semibold">Últimos registros</h3>
         {recordsQuery.isLoading ? (
           <Loader />
+        ) : recordsQuery.isError ? (
+          <p className="text-sm text-red-600">{apiErrorMessage(recordsQuery.error)}</p>
         ) : (recordsQuery.data?.length ?? 0) === 0 ? (
           <p className="text-sm text-muted-foreground">Aún no hay registros.</p>
         ) : (
