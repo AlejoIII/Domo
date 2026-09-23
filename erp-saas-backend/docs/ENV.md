@@ -9,8 +9,10 @@ Referencia de todas las variables soportadas. Copia `.env.example` como base.
 | `NODE_ENV` | No | `development` | `development`, `test`, `production` |
 | `PORT` | No | `3000` | Puerto HTTP de la API |
 | `DATABASE_URL` | **Sí** | — | PostgreSQL. Con PgBouncer añade `?pgbouncer=true&connection_limit=10` |
-| `DATABASE_DIRECT_URL` | **Sí** | igual que `DATABASE_URL` | Conexión directa para `prisma migrate` (sin pooler) |
+| `DATABASE_DIRECT_URL` | **Sí*** | igual que `DATABASE_URL` | Conexión directa para `prisma migrate` (sin pooler) |
 | `DATABASE_READ_URL` | No | — | Réplica de lectura; dashboard/informes la usan si está definida |
+
+\*Obligatoria en el schema. Si usas `npm run prisma:migrate:deploy`, se rellena sola con `DATABASE_URL` cuando falta. Sin script: añádela a `.env` (misma URL si no usas PgBouncer).
 
 ## Auth / JWT
 
