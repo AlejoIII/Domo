@@ -9,9 +9,10 @@ import {
   QUEUE_AUDIT,
   QUEUE_EMAIL,
   QUEUE_EXPORTS,
+  QUEUE_VERIFACTU,
   QUEUE_WEBHOOKS,
 } from './queue.constants';
-import { runAuditJob, runEmailJob, runWebhookJob } from './job-handlers';
+import { runAuditJob, runEmailJob, runVerifactuJob, runWebhookJob } from './job-handlers';
 import type {
   AuditJobPayload,
   CustomEmailJobPayload,
@@ -20,6 +21,7 @@ import type {
   ExportJobPayload,
   InvitationEmailJobPayload,
   RawEmailJobPayload,
+  VerifactuJobPayload,
   WebhookJobPayload,
 } from './queue.types';
 
@@ -28,6 +30,7 @@ export interface QueueStats {
   audit: { waiting: number; active: number; failed: number };
   email: { waiting: number; active: number; failed: number };
   exports: { waiting: number; active: number; failed: number };
+  verifactu: { waiting: number; active: number; failed: number };
 }
 
 @Injectable()
@@ -41,6 +44,7 @@ export class QueueService {
     @Optional() @InjectQueue(QUEUE_AUDIT) private readonly auditQueue?: Queue,
     @Optional() @InjectQueue(QUEUE_EMAIL) private readonly emailQueue?: Queue,
     @Optional() @InjectQueue(QUEUE_EXPORTS) private readonly exportsQueue?: Queue,
+    @Optional() @InjectQueue(QUEUE_VERIFACTU) private readonly verifactuQueue?: Queue,
   ) {}
 
   enqueueWebhook(payload: WebhookJobPayload): void {
@@ -57,6 +61,15 @@ export class QueueService {
 
   enqueueExport(payload: ExportJobPayload, idempotentJobId: string): void {
     void this.addJob(QUEUE_EXPORTS, 'export', payload, idempotentJobId);
+  }
+
+  enqueueVerifactu(payload: VerifactuJobPayload): void {
+    void this.addJob(
+      QUEUE_VERIFACTU,
+      'verifactu',
+      payload,
+      `verifactu-${payload.recordId}`,
+    );
   }
 
   enqueueRawEmail(payload: Omit<RawEmailJobPayload, 'kind'>): void {
@@ -78,14 +91,15 @@ export class QueueService {
   async getStats(): Promise<QueueStats | null> {
     if (!this.canUseBull()) return null;
 
-    const [webhooks, audit, email, exports] = await Promise.all([
+    const [webhooks, audit, email, exports, verifactu] = await Promise.all([
       this.counts(this.webhooksQueue!),
       this.counts(this.auditQueue!),
       this.counts(this.emailQueue!),
       this.counts(this.exportsQueue!),
+      this.counts(this.verifactuQueue!),
     ]);
 
-    return { webhooks, audit, email, exports };
+    return { webhooks, audit, email, exports, verifactu };
   }
 
   private async addJob(
@@ -122,6 +136,8 @@ export class QueueService {
         return this.emailQueue;
       case QUEUE_EXPORTS:
         return this.exportsQueue;
+      case QUEUE_VERIFACTU:
+        return this.verifactuQueue;
       default:
         return undefined;
     }
@@ -133,6 +149,7 @@ export class QueueService {
       !!this.auditQueue &&
       !!this.emailQueue &&
       !!this.exportsQueue &&
+      !!this.verifactuQueue &&
       this.redis.isReady()
     );
   }
@@ -163,6 +180,14 @@ export class QueueService {
           const { ExportJobHandler } = await import('./export-job.handler');
           const handler = this.moduleRef.get(ExportJobHandler, { strict: false });
           await handler.handle(payload as ExportJobPayload);
+          break;
+        }
+        case QUEUE_VERIFACTU: {
+          const { VerifactuRemitService } = await import(
+            '../../modules/verifactu/verifactu-remit.service'
+          );
+          const remit = this.moduleRef.get(VerifactuRemitService, { strict: false });
+          await runVerifactuJob(remit, payload as VerifactuJobPayload);
           break;
         }
       }

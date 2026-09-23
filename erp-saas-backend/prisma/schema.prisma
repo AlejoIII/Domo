@@ -90,6 +90,19 @@ model Company {
   betaInvites         BetaInvite[]
   betaFeedback        BetaFeedback[]
 
+  /// Verifactu / SIF (fase propia) — remisión AEAT por empresa
+  verifactuEnabled          Boolean  @default(false)
+  /// verifactu | no_verificable
+  verifactuMode             String   @default("verifactu")
+  /// NIF emisor (si distinto de taxId)
+  verifactuNif              String?
+  /// Certificado PKCS#12 / PEM cifrado (AES-GCM)
+  verifactuCertPemEnc       String?  @db.Text
+  verifactuCertPassEnc      String?
+  verifactuCertFingerprint  String?
+  verifactuRecords          VerifactuRecord[]
+  verifactuChain            VerifactuChainHead?
+
   @@map("companies")
 }
 
@@ -586,6 +599,7 @@ model Invoice {
   timeEntries TimeEntry[]
   originalInvoice Invoice?  @relation("InvoiceCreditNotes", fields: [originalInvoiceId], references: [id], onDelete: SetNull)
   creditNotes     Invoice[] @relation("InvoiceCreditNotes")
+  verifactuRecords VerifactuRecord[]
 
   @@unique([companyId, number])
   @@index([companyId])
@@ -1330,4 +1344,61 @@ model ManufacturingOrder {
   @@unique([companyId, number])
   @@index([companyId, status])
   @@map("manufacturing_orders")
+}
+
+/// Cabeza de cadena Verifactu por empresa (bloqueo al emitir).
+model VerifactuChainHead {
+  id              String    @id @default(uuid())
+  companyId       String    @unique
+  lastHuella      String?
+  lastRecordId    String?
+  lastGeneratedAt DateTime?
+  recordCount     Int       @default(0)
+  updatedAt       DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("verifactu_chain_heads")
+}
+
+/// Registro de facturación Verifactu (alta / anulación) encadenado.
+model VerifactuRecord {
+  id               String    @id @default(uuid())
+  companyId        String
+  invoiceId        String?
+  /// alta | anulacion
+  recordType       String
+  /// F1, F2, R1… (AEAT TipoFactura)
+  invoiceType      String?
+  idEmisorFactura  String
+  numSerieFactura  String
+  /// DD-MM-YYYY (formato AEAT)
+  fechaExpedicion  String
+  cuotaTotal       Decimal   @db.Decimal(12, 2)
+  importeTotal     Decimal   @db.Decimal(12, 2)
+  huella           String
+  huellaAnterior   String?
+  fechaHoraHusoGen DateTime
+  sequenceNo       Int
+  xmlPayload       String    @db.Text
+  qrPayload        String?   @db.Text
+  /// pending | queued | sent | accepted | accepted_with_errors | rejected | skipped | dry_run
+  aeatStatus       String    @default("pending")
+  aeatCsv          String?
+  aeatResponseXml  String?   @db.Text
+  aeatSentAt       DateTime?
+  aeatError        String?   @db.Text
+  /// Incidencia técnica de remisión (OM art. control de flujo)
+  incidenciaRemision Boolean @default(false)
+  createdAt        DateTime  @default(now())
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invoice Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+
+  @@unique([companyId, sequenceNo])
+  @@unique([companyId, huella])
+  @@index([companyId, aeatStatus])
+  @@index([companyId, createdAt])
+  @@index([invoiceId])
+  @@map("verifactu_records")
 }

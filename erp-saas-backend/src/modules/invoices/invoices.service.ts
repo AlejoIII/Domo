@@ -26,6 +26,7 @@ import {
   PLAN_FEATURE_KEYS,
   PRINT_WATERMARK_TEXT,
 } from '../billing/plan-features.constants';
+import { VerifactuRecordService } from '../verifactu/verifactu-record.service';
 
 @Injectable()
 export class InvoicesService {
@@ -39,6 +40,7 @@ export class InvoicesService {
     private readonly accountingPosting: AccountingPostingService,
     private readonly cacheInvalidation: CacheInvalidationService,
     private readonly documentPdf: DocumentPdfService,
+    private readonly verifactu: VerifactuRecordService,
   ) {}
 
   async findAll(companyId: string, query: QueryInvoicesDto) {
@@ -68,6 +70,7 @@ export class InvoicesService {
     const invoice = await this.repo.create(companyId, dto);
     if (invoice.status === 'issued') {
       await this.accountingPosting.postInvoiceIssue(companyId, invoice);
+      await this.verifactu.recordAltaOnIssue(invoice);
     }
     this.cacheInvalidation.onBusinessDataChanged(companyId);
     return mapInvoice(invoice);
@@ -83,6 +86,7 @@ export class InvoicesService {
     if (!updated) throw new NotFoundException('Factura no encontrada');
     if (before && before.status !== 'issued' && updated.status === 'issued') {
       await this.accountingPosting.postInvoiceIssue(companyId, updated);
+      await this.verifactu.recordAltaOnIssue(updated);
     }
     this.cacheInvalidation.onBusinessDataChanged(companyId);
     return mapInvoice(updated);
@@ -177,6 +181,13 @@ export class InvoicesService {
     );
 
     await this.accountingPosting.postCreditNoteIssue(companyId, creditNote, original.number);
+    await this.verifactu.recordAltaOnIssue({
+      ...creditNote,
+      originalInvoice: {
+        number: original.number,
+        issueDate: original.issueDate,
+      },
+    });
     await this.syncInvoiceStatus(original.id);
     this.cacheInvalidation.onBusinessDataChanged(companyId);
 
@@ -379,6 +390,8 @@ export class InvoicesService {
 
     const updated = await this.repo.update(id, companyId, { status: 'cancelled' });
     if (!updated) throw new NotFoundException('Factura no encontrada');
+
+    await this.verifactu.recordAnulacionOnCancel(invoice);
 
     if (invoice.orderId) {
       await this.prisma.salesOrder.updateMany({

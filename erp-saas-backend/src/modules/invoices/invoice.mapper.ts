@@ -7,9 +7,9 @@ export type CreditNoteRef = Pick<Invoice, 'id' | 'number' | 'status' | 'total' |
 type InvoiceRecord = Invoice & {
   lines: InvoiceLine[];
   payments?: Payment[];
-  client?: { id: string; name: string } | null;
+  client?: { id: string; name: string; taxId?: string | null } | null;
   creditNotes?: CreditNoteRef[];
-  originalInvoice?: { id: string; number: string } | null;
+  originalInvoice?: { id: string; number: string; issueDate?: Date } | null;
 };
 
 function roundMoney(value: number) {
@@ -80,7 +80,15 @@ export function mapInvoice(invoice: InvoiceRecord) {
     status: invoice.status,
     documentType: invoice.documentType,
     originalInvoiceId: invoice.originalInvoiceId,
-    originalInvoice: invoice.originalInvoice ?? null,
+    originalInvoice: invoice.originalInvoice
+      ? {
+          id: invoice.originalInvoice.id,
+          number: invoice.originalInvoice.number,
+          ...(invoice.originalInvoice.issueDate
+            ? { issueDate: invoice.originalInvoice.issueDate.toISOString() }
+            : {}),
+        }
+      : null,
     creditReason: invoice.creditReason,
     issueDate: invoice.issueDate.toISOString(),
     dueDate: invoice.dueDate?.toISOString() ?? null,

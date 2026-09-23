@@ -2,6 +2,7 @@ export const QUEUE_WEBHOOKS = 'webhooks';
 export const QUEUE_AUDIT = 'audit';
 export const QUEUE_EMAIL = 'email';
 export const QUEUE_EXPORTS = 'exports';
+export const QUEUE_VERIFACTU = 'verifactu';
 
 export const QUEUE_PREFIX = 'domo:bull';
 

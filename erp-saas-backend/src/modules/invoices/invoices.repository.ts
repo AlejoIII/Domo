@@ -6,10 +6,10 @@ import { QueryInvoicesDto } from './dto/query-invoices.dto';
 import { calcLines } from '../../common/utils/document-totals';
 
 const invoiceInclude = {
-  client: { select: { id: true, name: true } },
+  client: { select: { id: true, name: true, taxId: true } },
   lines: true,
   payments: { orderBy: { paymentDate: 'desc' as const } },
-  originalInvoice: { select: { id: true, number: true } },
+  originalInvoice: { select: { id: true, number: true, issueDate: true } },
   creditNotes: {
     where: { deletedAt: null },
     select: {

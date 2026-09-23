@@ -112,12 +112,12 @@ La vista `/:id/print` del navegador se mantiene para impresión directa.
 
 | Requisito | Estado | Nota |
 |---|---|---|
-| **Verifactu** | No implementado | Obligatorio para software de facturación; requiere huella/hash encadenado, registro de eventos y remisión a AEAT |
+| **Verifactu** | Esqueleto (no certificación) | Cadena + XML + cola + API; ver `docs/VERIFACTU.md`. Falta SOAP AEAT, QR en PDF, multi-IVA y declaración responsable |
 | **Facturae** (XML) | No implementado | Necesario para facturación a administraciones públicas |
 | **SII** | No implementado | Solo aplica a grandes empresas y REDEME |
 | **Desglose multi-IVA** | No implementado | Hoy el IVA es único por documento (`taxRate` en cabecera) |
 | **Facturas de proveedor (AP)** | No implementado | Existen órdenes de compra, falta conciliación contable |
 
 > Verifactu es el bloqueante real para vender el producto como software de facturación en España.
-> Requiere trabajo estructural (encadenado de registros, firma, envío) y debería abordarse como
-> fase propia.
+> El esqueleto actual no habilita el cumplimiento por sí solo: la remisión AEAT está en dry-run
+> y debe abordarse hasta certificación en preproducción.
