@@ -112,10 +112,10 @@ La vista `/:id/print` del navegador se mantiene para impresión directa.
 
 | Requisito | Estado | Nota |
 |---|---|---|
-| **Verifactu** | Esqueleto (no certificación) | Cadena + XML + cola + API; ver `docs/VERIFACTU.md`. Falta SOAP AEAT, QR en PDF, multi-IVA y declaración responsable |
+| **Verifactu** | Esqueleto + QR/PDF + multi-IVA + UI | Cadena + XML + cola + ajustes. Falta SOAP AEAT real y declaración responsable |
 | **Facturae** (XML) | No implementado | Necesario para facturación a administraciones públicas |
 | **SII** | No implementado | Solo aplica a grandes empresas y REDEME |
-| **Desglose multi-IVA** | No implementado | Hoy el IVA es único por documento (`taxRate` en cabecera) |
+| **Desglose multi-IVA** | Parcial | IVA por línea en facturas (`InvoiceLine.taxRate`); presupuestos/pedidos aún cabecera única |
 | **Facturas de proveedor (AP)** | No implementado | Existen órdenes de compra, falta conciliación contable |
 
 > Verifactu es el bloqueante real para vender el producto como software de facturación en España.

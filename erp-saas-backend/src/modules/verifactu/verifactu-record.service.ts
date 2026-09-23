@@ -14,6 +14,8 @@ import {
   VERIFACTU_AEAT_STATUS,
   VERIFACTU_RECORD_TYPE,
 } from './verifactu.constants';
+import { calcLines } from '../../common/utils/document-totals';
+import type { VerifactuDesgloseIva } from './verifactu-xml.builder';
 
 export interface IssueInvoiceForVerifactu {
   id: string;
@@ -27,6 +29,10 @@ export interface IssueInvoiceForVerifactu {
   taxRate: Prisma.Decimal | number | string;
   total: Prisma.Decimal | number | string;
   notes?: string | null;
+  lines?: Array<{
+    lineTotal: Prisma.Decimal | number | string;
+    taxRate?: Prisma.Decimal | number | string | null;
+  }>;
   originalInvoice?: {
     number: string;
     issueDate: Date;
@@ -99,9 +105,8 @@ export class VerifactuRecordService {
     const fechaExp = this.hash.formatFechaExpedicion(invoice.issueDate);
     const cuota = this.hash.formatMoney(Number(invoice.taxAmount));
     const importe = this.hash.formatMoney(Number(invoice.total));
-    const base = this.hash.formatMoney(Number(invoice.subtotal));
-    const tipoImpositivo = this.hash.formatMoney(Number(invoice.taxRate));
     const tipoFactura = this.mapTipoFactura(invoice);
+    const desglose = this.buildDesglose(invoice);
 
     const record = await this.prisma.$transaction(async (tx) => {
       const chain = await tx.verifactuChainHead.upsert({
@@ -141,16 +146,7 @@ export class VerifactuRecordService {
         huellaAnterior: locked.lastHuella,
         fechaHoraHusoGenRegistro: fechaHora,
         nombreRazonEmisor: company.name,
-        desglose: [
-          {
-            impuesto: '01',
-            claveRegimen: '01',
-            calificacionOperacion: 'S1',
-            tipoImpositivo,
-            baseImponibleOimporteNoSujeto: base,
-            cuotaRepercutida: cuota,
-          },
-        ],
+        desglose,
         destinatario: invoice.client
           ? {
               nif: invoice.client.taxId ?? undefined,
@@ -395,5 +391,35 @@ export class VerifactuRecordService {
   private mapTipoFactura(invoice: IssueInvoiceForVerifactu): string {
     if (invoice.documentType === 'credit_note') return 'R1';
     return 'F1';
+  }
+
+  private buildDesglose(invoice: IssueInvoiceForVerifactu): VerifactuDesgloseIva[] {
+    const defaultRate = Number(invoice.taxRate);
+    const lineInputs = (invoice.lines ?? []).map((line) => ({
+      description: 'line',
+      quantity: 1,
+      unitPrice: Number(line.lineTotal),
+      taxRate: line.taxRate != null ? Number(line.taxRate) : null,
+    }));
+
+    const breakdown =
+      lineInputs.length > 0
+        ? calcLines(lineInputs, defaultRate).taxBreakdown
+        : [
+            {
+              taxRate: defaultRate,
+              base: Number(invoice.subtotal),
+              taxAmount: Number(invoice.taxAmount),
+            },
+          ];
+
+    return breakdown.map((row) => ({
+      impuesto: '01',
+      claveRegimen: '01',
+      calificacionOperacion: 'S1',
+      tipoImpositivo: this.hash.formatMoney(row.taxRate),
+      baseImponibleOimporteNoSujeto: this.hash.formatMoney(row.base),
+      cuotaRepercutida: this.hash.formatMoney(row.taxAmount),
+    }));
   }
 }

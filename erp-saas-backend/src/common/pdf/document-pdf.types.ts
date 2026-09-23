@@ -16,6 +16,13 @@ export interface PdfDocumentLine {
   quantity: number;
   unitPrice: number;
   lineTotal: number;
+  taxRate?: number | null;
+}
+
+export interface PdfTaxBreakdownRow {
+  taxRate: number;
+  base: number;
+  taxAmount: number;
 }
 
 export interface PdfDocumentData {
@@ -34,6 +41,8 @@ export interface PdfDocumentData {
   taxRate: number;
   taxAmount: number;
   total: number;
+  /** Desglose multi-IVA; si hay varias filas se muestran en el PDF */
+  taxBreakdown?: PdfTaxBreakdownRow[];
   paidAmount?: number;
   balanceDue?: number;
   lines: PdfDocumentLine[];
@@ -41,6 +50,9 @@ export interface PdfDocumentData {
   recipient: PdfParty;
   /** Texto de marca de agua (plan Free) */
   watermark?: string | null;
+  /** URL QR Verifactu (AEAT ValidarQR) */
+  verifactuQrUrl?: string | null;
+  verifactuHuella?: string | null;
 }
 
 export const PDF_DOCUMENT_TITLES: Record<PdfDocumentKind, string> = {

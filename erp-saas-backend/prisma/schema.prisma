@@ -621,6 +621,8 @@ model InvoiceLine {
   quantity    Decimal @default(1) @db.Decimal(12, 2)
   unitPrice   Decimal @default(0) @db.Decimal(12, 2)
   lineTotal   Decimal @default(0) @db.Decimal(12, 2)
+  /// IVA de la línea; null = usa taxRate de cabecera
+  taxRate     Decimal? @db.Decimal(5, 2)
 
   invoice Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id])

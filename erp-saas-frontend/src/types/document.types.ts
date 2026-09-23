@@ -5,6 +5,8 @@ export interface DocLine {
   quantity: number;
   unitPrice: number;
   lineTotal?: number;
+  /** IVA de la línea; si se omite usa el de cabecera */
+  taxRate?: number | null;
 }
 
 export interface DocLinePayload {
@@ -13,4 +15,5 @@ export interface DocLinePayload {
   description: string;
   quantity: number;
   unitPrice: number;
+  taxRate?: number;
 }

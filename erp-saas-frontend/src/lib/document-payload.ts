@@ -9,11 +9,12 @@ type DocumentPayloadBase = {
 
 /** Campos calculados en cliente que el API no acepta (ValidationPipe forbidNonWhitelisted). */
 export function sanitizeDocumentLines(lines: DocLine[]): DocLinePayload[] {
-  return lines.map(({ productId, description, quantity, unitPrice }) => ({
+  return lines.map(({ productId, description, quantity, unitPrice, taxRate }) => ({
     ...(productId ? { productId } : {}),
     description,
     quantity: Number(quantity),
     unitPrice: Number(unitPrice),
+    ...(taxRate !== undefined && taxRate !== null ? { taxRate: Number(taxRate) } : {}),
   }));
 }
 

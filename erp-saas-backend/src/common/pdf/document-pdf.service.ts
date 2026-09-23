@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import PDFDocument from 'pdfkit';
+import QRCode from 'qrcode';
 import {
   PDF_DOCUMENT_TITLES,
   PdfDocumentData,
@@ -23,7 +24,16 @@ const COLUMNS = {
 /** Genera el PDF de facturas, rectificativas y presupuestos sin dependencias de navegador. */
 @Injectable()
 export class DocumentPdfService {
-  render(data: PdfDocumentData): Promise<Buffer> {
+  async render(data: PdfDocumentData): Promise<Buffer> {
+    const qrPng = data.verifactuQrUrl
+      ? await QRCode.toBuffer(data.verifactuQrUrl, {
+          type: 'png',
+          width: 160,
+          margin: 1,
+          errorCorrectionLevel: 'M',
+        })
+      : null;
+
     return new Promise((resolve, reject) => {
       const doc = new PDFDocument({
         size: 'A4',
@@ -47,6 +57,7 @@ export class DocumentPdfService {
         const endY = this.drawLines(doc, data);
         this.drawTotals(doc, data, endY);
         this.drawFooter(doc, data);
+        this.drawVerifactu(doc, data, qrPng);
         if (data.watermark) this.drawWatermark(doc, data.watermark);
         doc.end();
       } catch (err) {
@@ -189,12 +200,17 @@ export class DocumentPdfService {
 
     const labelX = 330;
     const valueX = COLUMNS.lineTotal.x;
+    const breakdown =
+      data.taxBreakdown && data.taxBreakdown.length > 0
+        ? data.taxBreakdown
+        : [{ taxRate: data.taxRate, base: data.subtotal, taxAmount: data.taxAmount }];
+
     const rows: Array<{ label: string; value: string; bold?: boolean }> = [
       { label: 'Base imponible', value: this.formatMoney(data.subtotal, data.currency) },
-      {
-        label: `IVA (${this.formatNumber(data.taxRate)} %)`,
-        value: this.formatMoney(data.taxAmount, data.currency),
-      },
+      ...breakdown.map((row) => ({
+        label: `IVA (${this.formatNumber(row.taxRate)} %)`,
+        value: this.formatMoney(row.taxAmount, data.currency),
+      })),
       { label: 'Total', value: this.formatMoney(data.total, data.currency), bold: true },
     ];
 
@@ -246,6 +262,46 @@ export class DocumentPdfService {
           { width: 499 },
         );
     }
+  }
+
+  private drawVerifactu(
+    doc: PDFKit.PDFDocument,
+    data: PdfDocumentData,
+    qrPng: Buffer | null,
+  ) {
+    if (!qrPng && !data.verifactuQrUrl) return;
+
+    let y = doc.y + 16;
+    if (y > 680) {
+      doc.addPage();
+      y = PAGE_MARGIN;
+    }
+
+    doc.fontSize(8).font('Helvetica-Bold').fillColor(COLOR_MUTED)
+      .text('VERI*FACTU', PAGE_MARGIN, y);
+
+    const qrSize = 72;
+    if (qrPng) {
+      doc.image(qrPng, PAGE_MARGIN, y + 12, { width: qrSize, height: qrSize });
+    }
+
+    const textX = PAGE_MARGIN + qrSize + 12;
+    doc.fontSize(8).font('Helvetica').fillColor(COLOR_MUTED)
+      .text(
+        'Factura verificable en la sede electrónica de la AEAT.',
+        textX,
+        y + 16,
+        { width: 400 },
+      );
+    if (data.verifactuHuella) {
+      doc.text(
+        `Huella: ${data.verifactuHuella.slice(0, 32)}…`,
+        textX,
+        doc.y + 4,
+        { width: 400 },
+      );
+    }
+    doc.y = Math.max(doc.y, y + 12 + qrSize) + 8;
   }
 
   private drawWatermark(doc: PDFKit.PDFDocument, text: string) {

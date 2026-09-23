@@ -27,6 +27,8 @@ import {
   PRINT_WATERMARK_TEXT,
 } from '../billing/plan-features.constants';
 import { VerifactuRecordService } from '../verifactu/verifactu-record.service';
+import { calcLines } from '../../common/utils/document-totals';
+import { VERIFACTU_RECORD_TYPE } from '../verifactu/verifactu.constants';
 
 @Injectable()
 export class InvoicesService {
@@ -155,12 +157,19 @@ export class InvoicesService {
           description: line.description,
           quantity: Number(line.quantity),
           unitPrice: Number(line.unitPrice),
+          taxRate: line.taxRate != null ? Number(line.taxRate) : undefined,
         }));
 
     const taxRate = Number(original.taxRate);
-    const requested = round2(
-      lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0) * (1 + taxRate / 100),
-    );
+    const requested = calcLines(
+      lines.map((line) => ({
+        description: line.description,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        taxRate: 'taxRate' in line ? line.taxRate : undefined,
+      })),
+      taxRate,
+    ).total;
     if (requested > creditableAmount + 0.01) {
       throw new BadRequestException(
         `El importe a rectificar (${requested}) supera el pendiente de rectificar (${creditableAmount})`,
@@ -242,6 +251,23 @@ export class InvoicesService {
       invoice.creditNotes,
     );
     const isCreditNote = invoice.documentType === 'credit_note';
+    const lineInputs = invoice.lines.map((line) => ({
+      description: line.description,
+      quantity: Number(line.quantity),
+      unitPrice: Number(line.unitPrice),
+      taxRate: line.taxRate != null ? Number(line.taxRate) : null,
+    }));
+    const totals = calcLines(lineInputs, Number(invoice.taxRate));
+
+    const verifactuAlta = await this.prisma.verifactuRecord.findFirst({
+      where: {
+        companyId,
+        invoiceId: invoice.id,
+        recordType: VERIFACTU_RECORD_TYPE.ALTA,
+      },
+      orderBy: { sequenceNo: 'desc' },
+      select: { qrPayload: true, huella: true },
+    });
 
     const data: PdfDocumentData = {
       kind: isCreditNote ? 'credit_note' : 'invoice',
@@ -257,6 +283,7 @@ export class InvoicesService {
       taxRate: Number(invoice.taxRate),
       taxAmount: Number(invoice.taxAmount),
       total: Number(invoice.total),
+      taxBreakdown: totals.taxBreakdown,
       paidAmount: isCreditNote ? undefined : paidAmount,
       balanceDue: isCreditNote ? undefined : balanceDue,
       lines: invoice.lines.map((line) => ({
@@ -264,10 +291,13 @@ export class InvoicesService {
         quantity: Number(line.quantity),
         unitPrice: Number(line.unitPrice),
         lineTotal: Number(line.lineTotal),
+        taxRate: line.taxRate != null ? Number(line.taxRate) : Number(invoice.taxRate),
       })),
       issuer: company,
       recipient: client ?? { name: invoice.client?.name ?? 'Cliente' },
       watermark: showWatermark ? PRINT_WATERMARK_TEXT : null,
+      verifactuQrUrl: verifactuAlta?.qrPayload ?? null,
+      verifactuHuella: verifactuAlta?.huella ?? null,
     };
 
     return {

@@ -154,17 +154,26 @@ export function InvoiceForm({ invoice, customFieldValues, onSubmit, onCancel, em
         errors={errors as never}
       />
 
-      <DocumentLinesEditor lines={lines} onChange={setLines} />
+      <DocumentLinesEditor
+        lines={lines}
+        onChange={setLines}
+        enableLineTaxRates
+        defaultTaxRate={Number(taxRate) || taxDefault}
+      />
 
       <div className="ml-auto max-w-xs space-y-1 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Subtotal</span>
           <span>{formatMoney(totals.subtotal)}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">IVA ({Number(taxRate)}%)</span>
-          <span>{formatMoney(totals.taxAmount)}</span>
-        </div>
+        {(totals.taxBreakdown?.length ? totals.taxBreakdown : [
+          { taxRate: Number(taxRate) || 0, taxAmount: totals.taxAmount },
+        ]).map((row) => (
+          <div key={row.taxRate} className="flex justify-between">
+            <span className="text-muted-foreground">IVA ({row.taxRate}%)</span>
+            <span>{formatMoney(row.taxAmount)}</span>
+          </div>
+        ))}
         <div className="flex justify-between border-t border-border/60 pt-2 text-base font-semibold">
           <span>Total</span>
           <span>{formatMoney(totals.total)}</span>

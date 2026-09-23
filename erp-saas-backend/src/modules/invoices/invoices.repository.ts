@@ -22,6 +22,22 @@ const invoiceInclude = {
     },
     orderBy: { issueDate: 'desc' as const },
   },
+  verifactuRecords: {
+    orderBy: { sequenceNo: 'desc' as const },
+    take: 5,
+    select: {
+      id: true,
+      recordType: true,
+      invoiceType: true,
+      aeatStatus: true,
+      aeatCsv: true,
+      huella: true,
+      qrPayload: true,
+      sequenceNo: true,
+      createdAt: true,
+      aeatError: true,
+    },
+  },
 } as const;
 
 @Injectable()
@@ -106,6 +122,7 @@ export class InvoicesRepository {
             quantity: line.quantity,
             unitPrice: line.unitPrice,
             lineTotal: line.lineTotal,
+            taxRate: line.taxRate,
           })),
         },
       },
@@ -148,6 +165,7 @@ export class InvoicesRepository {
                 quantity: line.quantity,
                 unitPrice: line.unitPrice,
                 lineTotal: line.lineTotal,
+                taxRate: line.taxRate,
               })),
             },
           },
@@ -163,6 +181,7 @@ export class InvoicesRepository {
           description: l.description,
           quantity: Number(l.quantity),
           unitPrice: Number(l.unitPrice),
+          taxRate: l.taxRate != null ? Number(l.taxRate) : null,
         })),
         taxRate,
       );
@@ -188,7 +207,13 @@ export class InvoicesRepository {
     original: { id: string; clientId: string; taxRate: number },
     params: {
       reason: string;
-      lines: Array<{ productId?: string; description: string; quantity: number; unitPrice: number }>;
+      lines: Array<{
+        productId?: string;
+        description: string;
+        quantity: number;
+        unitPrice: number;
+        taxRate?: number | null;
+      }>;
       issueDate?: string;
       notes?: string;
     },
@@ -219,6 +244,7 @@ export class InvoicesRepository {
             quantity: line.quantity,
             unitPrice: line.unitPrice,
             lineTotal: line.lineTotal,
+            taxRate: line.taxRate,
           })),
         },
       },
@@ -251,6 +277,7 @@ export class InvoicesRepository {
         description: l.description,
         quantity: Number(l.quantity),
         unitPrice: Number(l.unitPrice),
+        taxRate: l.taxRate != null ? Number(l.taxRate) : undefined,
       })),
     });
   }

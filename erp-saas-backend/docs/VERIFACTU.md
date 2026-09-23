@@ -38,10 +38,10 @@ Ver `docs/ENV.md` sección Verifactu.
 
 1. Validar huella contra documento oficial AEAT de ejemplos.
 2. Cliente SOAP mTLS + parseo CSV/respuesta.
-3. QR Verifactu en PDF (`DocumentPdfService`).
-4. Multi-IVA en líneas (hoy un solo `taxRate` de cabecera).
+3. ~~QR Verifactu en PDF (`DocumentPdfService`).~~
+4. ~~Multi-IVA en líneas de factura (`InvoiceLine.taxRate`).~~
 5. Declaración responsable del fabricante Domo.
-6. UI ajustes + badge de estado en factura.
+6. ~~UI ajustes + estado en factura.~~
 7. Entorno de preproducción AEAT end-to-end.
 
 ## Referencias
