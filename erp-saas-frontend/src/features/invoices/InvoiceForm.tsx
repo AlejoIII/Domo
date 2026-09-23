@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
@@ -106,11 +107,24 @@ export function InvoiceForm({ invoice, customFieldValues, onSubmit, onCancel, em
         dueDate: fields.dueDate || undefined,
         notes: fields.notes || undefined,
         taxRate: Number(fields.taxRate),
-        ...totals,
+        subtotal: totals.subtotal,
+        taxAmount: totals.taxAmount,
+        total: totals.total,
         lines: toLinePayloads(lines),
       }, customFields);
-    } catch {
-      // parent handles errors
+    } catch (err) {
+      if (isAxiosError(err)) {
+        const msg = err.response?.data?.message;
+        setError(
+          Array.isArray(msg)
+            ? msg.join(', ')
+            : typeof msg === 'string'
+              ? msg
+              : err.message || 'No se pudo guardar la factura',
+        );
+      } else {
+        setError(err instanceof Error ? err.message : 'No se pudo guardar la factura');
+      }
     }
   };
 

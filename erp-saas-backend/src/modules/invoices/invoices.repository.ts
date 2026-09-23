@@ -5,7 +5,7 @@ import { CreateInvoiceDto, UpdateInvoiceDto } from './dto/invoice.dto';
 import { QueryInvoicesDto } from './dto/query-invoices.dto';
 import { calcLines } from '../../common/utils/document-totals';
 
-const invoiceInclude = {
+const invoiceListInclude = {
   client: { select: { id: true, name: true, taxId: true } },
   lines: true,
   payments: { orderBy: { paymentDate: 'desc' as const } },
@@ -22,6 +22,10 @@ const invoiceInclude = {
     },
     orderBy: { issueDate: 'desc' as const },
   },
+} as const;
+
+const invoiceDetailInclude = {
+  ...invoiceListInclude,
   verifactuRecords: {
     orderBy: { sequenceNo: 'desc' as const },
     take: 5,
@@ -83,7 +87,7 @@ export class InvoicesRepository {
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: invoiceInclude,
+        include: invoiceListInclude,
       }),
       this.prisma.invoice.count({ where }),
     ]);
@@ -92,7 +96,7 @@ export class InvoicesRepository {
   findById(id: string, companyId: string) {
     return this.prisma.invoice.findFirst({
       where: { id, companyId, deletedAt: null },
-      include: invoiceInclude,
+      include: invoiceDetailInclude,
     });
   }
 
@@ -126,7 +130,7 @@ export class InvoicesRepository {
           })),
         },
       },
-      include: invoiceInclude,
+      include: invoiceDetailInclude,
     });
   }
 
@@ -169,7 +173,7 @@ export class InvoicesRepository {
               })),
             },
           },
-          include: invoiceInclude,
+          include: invoiceDetailInclude,
         });
       });
     }
@@ -194,7 +198,7 @@ export class InvoicesRepository {
     return this.prisma.invoice.update({
       where: { id },
       data,
-      include: invoiceInclude,
+      include: invoiceDetailInclude,
     });
   }
 
@@ -248,7 +252,7 @@ export class InvoicesRepository {
           })),
         },
       },
-      include: invoiceInclude,
+      include: invoiceDetailInclude,
     });
   }
 

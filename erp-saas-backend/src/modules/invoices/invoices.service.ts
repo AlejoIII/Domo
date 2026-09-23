@@ -72,10 +72,15 @@ export class InvoicesService {
     const invoice = await this.repo.create(companyId, dto);
     if (invoice.status === 'issued') {
       await this.accountingPosting.postInvoiceIssue(companyId, invoice);
-      await this.verifactu.recordAltaOnIssue(invoice);
+      try {
+        await this.verifactu.recordAltaOnIssue(invoice);
+      } catch (err) {
+        // La factura ya está emitida; no revertir por fallo de remisión/cadena
+        console.error('Verifactu alta failed after invoice issue', err);
+      }
     }
     this.cacheInvalidation.onBusinessDataChanged(companyId);
-    return mapInvoice(invoice);
+    return mapInvoice(await this.repo.findById(invoice.id, companyId) ?? invoice);
   }
 
   async update(id: string, companyId: string, dto: UpdateInvoiceDto) {
@@ -88,10 +93,14 @@ export class InvoicesService {
     if (!updated) throw new NotFoundException('Factura no encontrada');
     if (before && before.status !== 'issued' && updated.status === 'issued') {
       await this.accountingPosting.postInvoiceIssue(companyId, updated);
-      await this.verifactu.recordAltaOnIssue(updated);
+      try {
+        await this.verifactu.recordAltaOnIssue(updated);
+      } catch (err) {
+        console.error('Verifactu alta failed after invoice issue', err);
+      }
     }
     this.cacheInvalidation.onBusinessDataChanged(companyId);
-    return mapInvoice(updated);
+    return mapInvoice(await this.repo.findById(updated.id, companyId) ?? updated);
   }
 
   async remove(id: string, companyId: string) {
@@ -190,17 +199,21 @@ export class InvoicesService {
     );
 
     await this.accountingPosting.postCreditNoteIssue(companyId, creditNote, original.number);
-    await this.verifactu.recordAltaOnIssue({
-      ...creditNote,
-      originalInvoice: {
-        number: original.number,
-        issueDate: original.issueDate,
-      },
-    });
+    try {
+      await this.verifactu.recordAltaOnIssue({
+        ...creditNote,
+        originalInvoice: {
+          number: original.number,
+          issueDate: original.issueDate,
+        },
+      });
+    } catch (err) {
+      console.error('Verifactu alta failed after credit note', err);
+    }
     await this.syncInvoiceStatus(original.id);
     this.cacheInvalidation.onBusinessDataChanged(companyId);
 
-    return mapInvoice(creditNote);
+    return mapInvoice(await this.repo.findById(creditNote.id, companyId) ?? creditNote);
   }
 
   /** PDF generado en servidor: no depende del navegador ni de la vista de impresión. */
@@ -421,7 +434,11 @@ export class InvoicesService {
     const updated = await this.repo.update(id, companyId, { status: 'cancelled' });
     if (!updated) throw new NotFoundException('Factura no encontrada');
 
-    await this.verifactu.recordAnulacionOnCancel(invoice);
+    try {
+      await this.verifactu.recordAnulacionOnCancel(invoice);
+    } catch (err) {
+      console.error('Verifactu anulacion failed after invoice cancel', err);
+    }
 
     if (invoice.orderId) {
       await this.prisma.salesOrder.updateMany({
