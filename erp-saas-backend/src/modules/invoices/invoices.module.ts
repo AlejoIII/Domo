@@ -4,9 +4,10 @@ import { InvoicesService } from './invoices.service';
 import { InvoicesRepository } from './invoices.repository';
 import { MailModule } from '../../common/mail/mail.module';
 import { AccountingModule } from '../accounting/accounting.module';
+import { VerifactuModule } from '../verifactu/verifactu.module';
 
 @Module({
-  imports: [MailModule, AccountingModule],
+  imports: [MailModule, AccountingModule, VerifactuModule],
   controllers: [InvoicesController],
   providers: [InvoicesService, InvoicesRepository],
   exports: [InvoicesService],

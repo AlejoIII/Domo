@@ -7,9 +7,21 @@ export type CreditNoteRef = Pick<Invoice, 'id' | 'number' | 'status' | 'total' |
 type InvoiceRecord = Invoice & {
   lines: InvoiceLine[];
   payments?: Payment[];
-  client?: { id: string; name: string } | null;
+  client?: { id: string; name: string; taxId?: string | null } | null;
   creditNotes?: CreditNoteRef[];
-  originalInvoice?: { id: string; number: string } | null;
+  originalInvoice?: { id: string; number: string; issueDate?: Date } | null;
+  verifactuRecords?: Array<{
+    id: string;
+    recordType: string;
+    invoiceType: string | null;
+    aeatStatus: string;
+    aeatCsv: string | null;
+    huella: string;
+    qrPayload: string | null;
+    sequenceNo: number;
+    createdAt: Date;
+    aeatError: string | null;
+  }>;
 };
 
 function roundMoney(value: number) {
@@ -80,7 +92,15 @@ export function mapInvoice(invoice: InvoiceRecord) {
     status: invoice.status,
     documentType: invoice.documentType,
     originalInvoiceId: invoice.originalInvoiceId,
-    originalInvoice: invoice.originalInvoice ?? null,
+    originalInvoice: invoice.originalInvoice
+      ? {
+          id: invoice.originalInvoice.id,
+          number: invoice.originalInvoice.number,
+          ...(invoice.originalInvoice.issueDate
+            ? { issueDate: invoice.originalInvoice.issueDate.toISOString() }
+            : {}),
+        }
+      : null,
     creditReason: invoice.creditReason,
     issueDate: invoice.issueDate.toISOString(),
     dueDate: invoice.dueDate?.toISOString() ?? null,
@@ -100,11 +120,39 @@ export function mapInvoice(invoice: InvoiceRecord) {
       quantity: Number(line.quantity),
       unitPrice: Number(line.unitPrice),
       lineTotal: Number(line.lineTotal),
+      taxRate: line.taxRate != null ? Number(line.taxRate) : null,
     })),
     payments: payments.map(mapPayment),
     creditNotes: creditNotes.map(mapCreditNoteRef),
+    verifactu: mapVerifactuSummary(invoice.verifactuRecords ?? []),
     createdAt: invoice.createdAt.toISOString(),
     updatedAt: invoice.updatedAt.toISOString(),
+  };
+}
+
+function mapVerifactuSummary(
+  records: NonNullable<InvoiceRecord['verifactuRecords']>,
+) {
+  if (!records.length) return null;
+  const alta = records.find((r) => r.recordType === 'alta') ?? records[0];
+  return {
+    recordId: alta.id,
+    recordType: alta.recordType,
+    invoiceType: alta.invoiceType,
+    aeatStatus: alta.aeatStatus,
+    aeatCsv: alta.aeatCsv,
+    huella: alta.huella,
+    qrUrl: alta.qrPayload,
+    sequenceNo: alta.sequenceNo,
+    createdAt: alta.createdAt.toISOString(),
+    aeatError: alta.aeatError,
+    records: records.map((r) => ({
+      id: r.id,
+      recordType: r.recordType,
+      aeatStatus: r.aeatStatus,
+      sequenceNo: r.sequenceNo,
+      createdAt: r.createdAt.toISOString(),
+    })),
   };
 }
 

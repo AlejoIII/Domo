@@ -50,6 +50,7 @@ import { TreasuryModule } from './modules/treasury/treasury.module';
 import { CrmModule } from './modules/crm/crm.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { ManufacturingModule } from './modules/manufacturing/manufacturing.module';
+import { VerifactuModule } from './modules/verifactu/verifactu.module';
 import { AssistantModule } from './modules/assistant/assistant.module';
 import { DataImportModule } from './modules/data-import/data-import.module';
 
@@ -114,6 +115,7 @@ import { DataImportModule } from './modules/data-import/data-import.module';
     CrmModule,
     ProjectsModule,
     ManufacturingModule,
+    VerifactuModule,
     AssistantModule,
     DataImportModule,
   ],

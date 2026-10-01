@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import { useQuery } from '@tanstack/react-query';
+import { isAxiosError } from 'axios';
 import { cn } from '@/lib/cn';
 import { Button } from '@/components/ui/Button';
 import { Loader } from '@/components/ui/Loader';
@@ -106,11 +107,24 @@ export function InvoiceForm({ invoice, customFieldValues, onSubmit, onCancel, em
         dueDate: fields.dueDate || undefined,
         notes: fields.notes || undefined,
         taxRate: Number(fields.taxRate),
-        ...totals,
+        subtotal: totals.subtotal,
+        taxAmount: totals.taxAmount,
+        total: totals.total,
         lines: toLinePayloads(lines),
       }, customFields);
-    } catch {
-      // parent handles errors
+    } catch (err) {
+      if (isAxiosError(err)) {
+        const msg = err.response?.data?.message;
+        setError(
+          Array.isArray(msg)
+            ? msg.join(', ')
+            : typeof msg === 'string'
+              ? msg
+              : err.message || 'No se pudo guardar la factura',
+        );
+      } else {
+        setError(err instanceof Error ? err.message : 'No se pudo guardar la factura');
+      }
     }
   };
 
@@ -154,17 +168,26 @@ export function InvoiceForm({ invoice, customFieldValues, onSubmit, onCancel, em
         errors={errors as never}
       />
 
-      <DocumentLinesEditor lines={lines} onChange={setLines} />
+      <DocumentLinesEditor
+        lines={lines}
+        onChange={setLines}
+        enableLineTaxRates
+        defaultTaxRate={Number(taxRate) || taxDefault}
+      />
 
       <div className="ml-auto max-w-xs space-y-1 text-sm">
         <div className="flex justify-between">
           <span className="text-muted-foreground">Subtotal</span>
           <span>{formatMoney(totals.subtotal)}</span>
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted-foreground">IVA ({Number(taxRate)}%)</span>
-          <span>{formatMoney(totals.taxAmount)}</span>
-        </div>
+        {(totals.taxBreakdown?.length ? totals.taxBreakdown : [
+          { taxRate: Number(taxRate) || 0, taxAmount: totals.taxAmount },
+        ]).map((row) => (
+          <div key={row.taxRate} className="flex justify-between">
+            <span className="text-muted-foreground">IVA ({row.taxRate}%)</span>
+            <span>{formatMoney(row.taxAmount)}</span>
+          </div>
+        ))}
         <div className="flex justify-between border-t border-border/60 pt-2 text-base font-semibold">
           <span>Total</span>
           <span>{formatMoney(totals.total)}</span>

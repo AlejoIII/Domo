@@ -634,9 +634,9 @@ Prioridad sugerida por encaje con núcleo actual:
 - [x] Export de datos, anonimización de cliente y baja de cuenta
 - [ ] Smoke: emitir rectificativa parcial → ver saldo minorado y asiento inverso
 - [ ] Smoke: descargar PDF con marca de agua en plan Free
-- [ ] Verifactu / Facturae (fase propia; ver `docs/LEGAL_ES.md`)
+- [~] Verifactu / Facturae (fase propia; esqueleto en `docs/VERIFACTU.md` — SOAP/QR/multi-IVA pendientes)
 
-> Guías: [`docs/LEGAL_ES.md`](./LEGAL_ES.md) · [`docs/RGPD.md`](./RGPD.md)
+> Guías: [`docs/LEGAL_ES.md`](./LEGAL_ES.md) · [`docs/RGPD.md`](./RGPD.md) · [`docs/VERIFACTU.md`](./VERIFACTU.md)
 
 ---
 

@@ -171,9 +171,17 @@ export class HealthService {
       }
 
       const failed =
-        stats.webhooks.failed + stats.audit.failed + stats.email.failed + stats.exports.failed;
+        stats.webhooks.failed +
+        stats.audit.failed +
+        stats.email.failed +
+        stats.exports.failed +
+        stats.verifactu.failed;
       const waiting =
-        stats.webhooks.waiting + stats.audit.waiting + stats.email.waiting + stats.exports.waiting;
+        stats.webhooks.waiting +
+        stats.audit.waiting +
+        stats.email.waiting +
+        stats.exports.waiting +
+        stats.verifactu.waiting;
 
       if (failed > 0) {
         return {

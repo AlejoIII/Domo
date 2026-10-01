@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { formatMoney } from '@/lib/format';
 import { lineTotal } from '@/lib/document-lines';
+import { cn } from '@/lib/cn';
 import { fetchProducts } from '@/services/products.service';
 import type { DocLine } from '@/types/document.types';
 
@@ -14,9 +15,17 @@ function emptyLine(): DocLine {
 interface DocumentLinesEditorProps {
   lines: DocLine[];
   onChange: (lines: DocLine[]) => void;
+  /** Muestra columna IVA por línea (facturas) */
+  enableLineTaxRates?: boolean;
+  defaultTaxRate?: number;
 }
 
-export function DocumentLinesEditor({ lines, onChange }: DocumentLinesEditorProps) {
+export function DocumentLinesEditor({
+  lines,
+  onChange,
+  enableLineTaxRates = false,
+  defaultTaxRate = 21,
+}: DocumentLinesEditorProps) {
   const { data } = useQuery({
     queryKey: ['products', 'picker'],
     queryFn: () => fetchProducts({ page: 1, limit: 100 }),
@@ -77,7 +86,12 @@ export function DocumentLinesEditor({ lines, onChange }: DocumentLinesEditorProp
           {lines.map((line, index) => (
             <div
               key={line.id ?? index}
-              className="grid gap-3 rounded-lg border border-border/60 p-3 sm:grid-cols-[1.2fr_1fr_5rem_7rem_6rem_auto]"
+              className={cn(
+                'grid gap-3 rounded-lg border border-border/60 p-3',
+                enableLineTaxRates
+                  ? 'sm:grid-cols-[1.2fr_1fr_5rem_7rem_5rem_6rem_auto]'
+                  : 'sm:grid-cols-[1.2fr_1fr_5rem_7rem_6rem_auto]',
+              )}
             >
               <div className="space-y-1">
                 {index === 0 && <label className="text-sm font-medium">Producto</label>}
@@ -118,6 +132,21 @@ export function DocumentLinesEditor({ lines, onChange }: DocumentLinesEditorProp
                 onChange={(e) => updateLine(index, { unitPrice: Number(e.target.value) })}
                 placeholder="50.00"
               />
+              {enableLineTaxRates && (
+                <Input
+                  label={index === 0 ? 'IVA %' : undefined}
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={line.taxRate ?? defaultTaxRate}
+                  onChange={(e) =>
+                    updateLine(index, {
+                      taxRate: e.target.value === '' ? defaultTaxRate : Number(e.target.value),
+                    })
+                  }
+                  placeholder={String(defaultTaxRate)}
+                />
+              )}
               <div className="space-y-1">
                 {index === 0 && <span className="text-sm font-medium">Total</span>}
                 <p className="flex h-10 items-center text-sm font-medium">

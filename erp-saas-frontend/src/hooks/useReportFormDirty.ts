@@ -14,6 +14,7 @@ export function useReportFormDirty(
 
   useEffect(() => {
     onDirtyChange?.(dirty);
+    return () => onDirtyChange?.(false);
   }, [dirty, onDirtyChange]);
 
   return dirty;

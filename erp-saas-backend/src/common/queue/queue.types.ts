@@ -61,3 +61,8 @@ export interface ExportJobPayload {
   format: 'csv' | 'xlsx';
   query: { from?: string; to?: string };
 }
+
+export interface VerifactuJobPayload {
+  companyId: string;
+  recordId: string;
+}

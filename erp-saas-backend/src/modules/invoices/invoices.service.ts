@@ -26,6 +26,9 @@ import {
   PLAN_FEATURE_KEYS,
   PRINT_WATERMARK_TEXT,
 } from '../billing/plan-features.constants';
+import { VerifactuRecordService } from '../verifactu/verifactu-record.service';
+import { calcLines } from '../../common/utils/document-totals';
+import { VERIFACTU_RECORD_TYPE } from '../verifactu/verifactu.constants';
 
 @Injectable()
 export class InvoicesService {
@@ -39,6 +42,7 @@ export class InvoicesService {
     private readonly accountingPosting: AccountingPostingService,
     private readonly cacheInvalidation: CacheInvalidationService,
     private readonly documentPdf: DocumentPdfService,
+    private readonly verifactu: VerifactuRecordService,
   ) {}
 
   async findAll(companyId: string, query: QueryInvoicesDto) {
@@ -68,9 +72,15 @@ export class InvoicesService {
     const invoice = await this.repo.create(companyId, dto);
     if (invoice.status === 'issued') {
       await this.accountingPosting.postInvoiceIssue(companyId, invoice);
+      try {
+        await this.verifactu.recordAltaOnIssue(invoice);
+      } catch (err) {
+        // La factura ya está emitida; no revertir por fallo de remisión/cadena
+        console.error('Verifactu alta failed after invoice issue', err);
+      }
     }
     this.cacheInvalidation.onBusinessDataChanged(companyId);
-    return mapInvoice(invoice);
+    return mapInvoice(await this.repo.findById(invoice.id, companyId) ?? invoice);
   }
 
   async update(id: string, companyId: string, dto: UpdateInvoiceDto) {
@@ -83,9 +93,14 @@ export class InvoicesService {
     if (!updated) throw new NotFoundException('Factura no encontrada');
     if (before && before.status !== 'issued' && updated.status === 'issued') {
       await this.accountingPosting.postInvoiceIssue(companyId, updated);
+      try {
+        await this.verifactu.recordAltaOnIssue(updated);
+      } catch (err) {
+        console.error('Verifactu alta failed after invoice issue', err);
+      }
     }
     this.cacheInvalidation.onBusinessDataChanged(companyId);
-    return mapInvoice(updated);
+    return mapInvoice(await this.repo.findById(updated.id, companyId) ?? updated);
   }
 
   async remove(id: string, companyId: string) {
@@ -151,12 +166,19 @@ export class InvoicesService {
           description: line.description,
           quantity: Number(line.quantity),
           unitPrice: Number(line.unitPrice),
+          taxRate: line.taxRate != null ? Number(line.taxRate) : undefined,
         }));
 
     const taxRate = Number(original.taxRate);
-    const requested = round2(
-      lines.reduce((sum, line) => sum + line.quantity * line.unitPrice, 0) * (1 + taxRate / 100),
-    );
+    const requested = calcLines(
+      lines.map((line) => ({
+        description: line.description,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        taxRate: 'taxRate' in line ? line.taxRate : undefined,
+      })),
+      taxRate,
+    ).total;
     if (requested > creditableAmount + 0.01) {
       throw new BadRequestException(
         `El importe a rectificar (${requested}) supera el pendiente de rectificar (${creditableAmount})`,
@@ -177,10 +199,21 @@ export class InvoicesService {
     );
 
     await this.accountingPosting.postCreditNoteIssue(companyId, creditNote, original.number);
+    try {
+      await this.verifactu.recordAltaOnIssue({
+        ...creditNote,
+        originalInvoice: {
+          number: original.number,
+          issueDate: original.issueDate,
+        },
+      });
+    } catch (err) {
+      console.error('Verifactu alta failed after credit note', err);
+    }
     await this.syncInvoiceStatus(original.id);
     this.cacheInvalidation.onBusinessDataChanged(companyId);
 
-    return mapInvoice(creditNote);
+    return mapInvoice(await this.repo.findById(creditNote.id, companyId) ?? creditNote);
   }
 
   /** PDF generado en servidor: no depende del navegador ni de la vista de impresión. */
@@ -231,6 +264,23 @@ export class InvoicesService {
       invoice.creditNotes,
     );
     const isCreditNote = invoice.documentType === 'credit_note';
+    const lineInputs = invoice.lines.map((line) => ({
+      description: line.description,
+      quantity: Number(line.quantity),
+      unitPrice: Number(line.unitPrice),
+      taxRate: line.taxRate != null ? Number(line.taxRate) : null,
+    }));
+    const totals = calcLines(lineInputs, Number(invoice.taxRate));
+
+    const verifactuAlta = await this.prisma.verifactuRecord.findFirst({
+      where: {
+        companyId,
+        invoiceId: invoice.id,
+        recordType: VERIFACTU_RECORD_TYPE.ALTA,
+      },
+      orderBy: { sequenceNo: 'desc' },
+      select: { qrPayload: true, huella: true },
+    });
 
     const data: PdfDocumentData = {
       kind: isCreditNote ? 'credit_note' : 'invoice',
@@ -246,6 +296,7 @@ export class InvoicesService {
       taxRate: Number(invoice.taxRate),
       taxAmount: Number(invoice.taxAmount),
       total: Number(invoice.total),
+      taxBreakdown: totals.taxBreakdown,
       paidAmount: isCreditNote ? undefined : paidAmount,
       balanceDue: isCreditNote ? undefined : balanceDue,
       lines: invoice.lines.map((line) => ({
@@ -253,10 +304,13 @@ export class InvoicesService {
         quantity: Number(line.quantity),
         unitPrice: Number(line.unitPrice),
         lineTotal: Number(line.lineTotal),
+        taxRate: line.taxRate != null ? Number(line.taxRate) : Number(invoice.taxRate),
       })),
       issuer: company,
       recipient: client ?? { name: invoice.client?.name ?? 'Cliente' },
       watermark: showWatermark ? PRINT_WATERMARK_TEXT : null,
+      verifactuQrUrl: verifactuAlta?.qrPayload ?? null,
+      verifactuHuella: verifactuAlta?.huella ?? null,
     };
 
     return {
@@ -379,6 +433,12 @@ export class InvoicesService {
 
     const updated = await this.repo.update(id, companyId, { status: 'cancelled' });
     if (!updated) throw new NotFoundException('Factura no encontrada');
+
+    try {
+      await this.verifactu.recordAnulacionOnCancel(invoice);
+    } catch (err) {
+      console.error('Verifactu anulacion failed after invoice cancel', err);
+    }
 
     if (invoice.orderId) {
       await this.prisma.salesOrder.updateMany({
