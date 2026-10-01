@@ -79,8 +79,12 @@ export async function validateBetaInvite(token: string, email?: string): Promise
   return unwrap<BetaInviteValidation>(res.data);
 }
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
-  const res = await api.post('/auth/login', { email, password });
+export async function login(
+  email: string,
+  password: string,
+  rememberMe = true,
+): Promise<LoginResponse> {
+  const res = await api.post('/auth/login', { email, password, rememberMe });
   return unwrap<LoginResponse>(res.data);
 }
 
@@ -154,8 +158,9 @@ export async function disableTwoFactor(code: string): Promise<{ enabled: boolean
 export async function verifyTotpLogin(
   tempToken: string,
   code: string,
+  rememberMe = true,
 ): Promise<LoginResponse> {
-  const res = await api.post('/auth/2fa/verify-login', { tempToken, code });
+  const res = await api.post('/auth/2fa/verify-login', { tempToken, code, rememberMe });
   return unwrap<LoginResponse>(res.data);
 }
 

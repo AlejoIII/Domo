@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, Optional } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ModuleRef } from '@nestjs/core';
 import type { Queue } from 'bullmq';
 import { EmailService } from '../mail/email.service';
@@ -40,6 +41,7 @@ export class QueueService {
   constructor(
     private readonly redis: RedisService,
     private readonly moduleRef: ModuleRef,
+    private readonly config: ConfigService,
     @Optional() @InjectQueue(QUEUE_WEBHOOKS) private readonly webhooksQueue?: Queue,
     @Optional() @InjectQueue(QUEUE_AUDIT) private readonly auditQueue?: Queue,
     @Optional() @InjectQueue(QUEUE_EMAIL) private readonly emailQueue?: Queue,
@@ -60,6 +62,10 @@ export class QueueService {
   }
 
   enqueueExport(payload: ExportJobPayload, idempotentJobId: string): void {
+    if (this.useInlineExports()) {
+      void this.processInline(QUEUE_EXPORTS, payload);
+      return;
+    }
     void this.addJob(QUEUE_EXPORTS, 'export', payload, idempotentJobId);
   }
 
@@ -70,6 +76,18 @@ export class QueueService {
       payload,
       `verifactu-${payload.recordId}`,
     );
+  }
+
+  /** Re-procesa una exportación atascada (p. ej. cola Bull sin worker). */
+  runExportInline(payload: ExportJobPayload): void {
+    void this.processInline(QUEUE_EXPORTS, payload);
+  }
+
+  private useInlineExports(): boolean {
+    const mode = (this.config.get<string>('QUEUE_EXPORTS_MODE', 'auto') ?? 'auto').toLowerCase();
+    if (mode === 'inline') return true;
+    if (mode === 'bull') return false;
+    return this.config.get('NODE_ENV') !== 'production';
   }
 
   enqueueRawEmail(payload: Omit<RawEmailJobPayload, 'kind'>): void {

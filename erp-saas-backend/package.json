@@ -30,7 +30,8 @@
     "migrate:uploads-s3": "npx ts-node scripts/migrate-uploads-to-s3.ts",
     "audit:purge": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} scripts/audit-purge.ts",
     "smoke:c7": "node scripts/smoke-c7.mjs",
-    "stripe:listen": "stripe listen --forward-to localhost:3000/api/v1/billing/webhook"
+    "stripe:listen": "stripe listen --forward-to localhost:3000/api/v1/billing/webhook",
+    "manuals:generate": "node scripts/generate-user-manuals.mjs"
   },
   "prisma": {
     "seed": "npx ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"

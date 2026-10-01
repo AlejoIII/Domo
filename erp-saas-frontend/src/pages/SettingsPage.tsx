@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   Building2, User, Palette, FileText, Bell, Shield, KeyRound, LogOut, Moon, Sun, Check, ScrollText,
-  LayoutGrid, CreditCard, Plug, PanelLeft, FileLock2, Stamp,
+  LayoutGrid, CreditCard, Plug, PanelLeft, FileLock2, Stamp, FileSpreadsheet,
 } from 'lucide-react';
 import { cn } from '@/lib/cn';
 import { Card } from '@/components/ui/Card';
@@ -20,6 +20,7 @@ import { IntegrationsSettingsSection } from '@/features/settings/IntegrationsSet
 import { NavigationSettingsSection } from '@/features/settings/NavigationSettingsSection';
 import { PrivacySettingsSection } from '@/features/settings/PrivacySettingsSection';
 import { VerifactuSettingsSection } from '@/features/settings/VerifactuSettingsSection';
+import { DataImportSettingsSection } from '@/features/settings/DataImportSettingsSection';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useAuthStore } from '@/store/auth.store';
 import { useThemeStore } from '@/store/theme.store';
@@ -52,6 +53,7 @@ const tabs = [
   { id: 'company', label: 'Empresa', icon: Building2 },
   { id: 'documents', label: 'Documentos', icon: FileText },
   { id: 'verifactu', label: 'Verifactu', icon: Stamp },
+  { id: 'import', label: 'Importación', icon: FileSpreadsheet },
   { id: 'forms', label: 'Fichas', icon: LayoutGrid },
   { id: 'roles', label: 'Roles', icon: KeyRound },
   { id: 'audit', label: 'Auditoría', icon: ScrollText },
@@ -119,7 +121,11 @@ export function SettingsPage() {
     }
   }, [billingResult, tabParam, queryClient, searchParams, setSearchParams]);
 
+  const canAccessImport =
+    hasPermission('products.write') || hasPermission('clients.write');
+
   const visibleTabs = tabs.filter((t) => {
+    if (t.id === 'import') return canAccessImport;
     if (ADMIN_ONLY_TABS.has(t.id)) return isAdmin;
     return true;
   });
@@ -160,6 +166,8 @@ export function SettingsPage() {
             onDirtyChange={setSectionDirty}
           />
         );
+      case 'import':
+        return <DataImportSettingsSection />;
       case 'forms':
         return <FormLayoutsSettingsSection />;
       case 'roles':
@@ -215,7 +223,15 @@ export function SettingsPage() {
     <div className="mx-auto max-w-5xl space-y-6">
       {dialog}
       <div>
-        <h1 className="text-2xl font-bold">Configuración</h1>
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <h1 className="text-2xl font-bold">Configuración</h1>
+          <Link
+            to="/help/manuals"
+            className="text-sm font-medium text-primary hover:underline"
+          >
+            Manuales de uso (PDF)
+          </Link>
+        </div>
         <p className="text-sm text-muted-foreground">
           {displayName}
           {user?.companyName ? ` · ${user.companyName}` : ''}

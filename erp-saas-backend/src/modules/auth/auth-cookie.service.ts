@@ -6,7 +6,6 @@ export const ACCESS_TOKEN_COOKIE = 'domo_at';
 export const REFRESH_TOKEN_COOKIE = 'domo_rt';
 
 const ACCESS_TTL_MS = 15 * 60 * 1000;
-const REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class AuthCookieService {
@@ -28,8 +27,20 @@ export class AuthCookieService {
     };
   }
 
-  setAuthCookies(res: Response, accessToken: string, refreshToken: string): void {
+  private refreshRememberMaxAgeMs(): number {
+    const days = Number(this.config.get('JWT_REFRESH_EXPIRES_DAYS', '7'));
+    if (!Number.isFinite(days) || days <= 0) return 7 * 24 * 60 * 60 * 1000;
+    return days * 24 * 60 * 60 * 1000;
+  }
+
+  setAuthCookies(
+    res: Response,
+    accessToken: string,
+    refreshToken: string,
+    options?: { rememberMe?: boolean },
+  ): void {
     const base = this.cookieBase();
+    const rememberMe = options?.rememberMe !== false;
     res.cookie(ACCESS_TOKEN_COOKIE, accessToken, {
       ...base,
       path: '/api',
@@ -38,7 +49,7 @@ export class AuthCookieService {
     res.cookie(REFRESH_TOKEN_COOKIE, refreshToken, {
       ...base,
       path: '/api/v1/auth',
-      maxAge: REFRESH_TTL_MS,
+      ...(rememberMe ? { maxAge: this.refreshRememberMaxAgeMs() } : {}),
     });
   }
 
@@ -56,9 +67,10 @@ export class AuthCookieService {
     const accessToken = payload.accessToken;
     const refreshToken = payload.refreshToken;
     if (typeof accessToken === 'string' && typeof refreshToken === 'string') {
-      this.setAuthCookies(res, accessToken, refreshToken);
+      const rememberMe = payload.rememberMe !== false;
+      this.setAuthCookies(res, accessToken, refreshToken, { rememberMe });
       if (!options?.forceExposeTokens && !this.exposeTokensInBody()) {
-        const { accessToken: _a, refreshToken: _r, ...rest } = payload;
+        const { accessToken: _a, refreshToken: _r, rememberMe: _m, ...rest } = payload;
         return rest as T;
       }
     }

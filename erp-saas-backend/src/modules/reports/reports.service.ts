@@ -365,7 +365,19 @@ export class ReportsService {
         downloadUrl: `/api/v1/reports/exports/${jobId}/download`,
       };
     }
+    const payload = {
+      jobId,
+      companyId,
+      reportType,
+      format,
+      query: { from: query.from, to: query.to },
+    };
+
     if (existing?.status === 'queued' || existing?.status === 'processing') {
+      const ageMs = Date.now() - new Date(existing.createdAt).getTime();
+      if (existing.status === 'queued' || ageMs > 15_000) {
+        this.queue.runExportInline(payload);
+      }
       return {
         jobId,
         status: existing.status,
@@ -381,16 +393,7 @@ export class ReportsService {
       format,
     });
 
-    this.queue.enqueueExport(
-      {
-        jobId,
-        companyId,
-        reportType,
-        format,
-        query: { from: query.from, to: query.to },
-      },
-      jobId,
-    );
+    this.queue.enqueueExport(payload, jobId);
 
     return {
       jobId,

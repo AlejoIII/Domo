@@ -1,40 +1,13 @@
 import { Link, Navigate } from 'react-router-dom';
-import { Check } from 'lucide-react';
+import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { Card } from '@/components/ui/Card';
+import { LandingDashboardPreview } from '@/components/marketing/LandingDashboardPreview';
 import { useAuthStore } from '@/store/auth.store';
 
-const plans = [
-  {
-    name: 'Free',
-    price: '0 €',
-    period: '/mes',
-    description: 'Para probar Domo con tu equipo',
-    features: ['Ventas y compras', 'Inventario básico', 'Hasta 2 usuarios'],
-    cta: 'Empezar gratis',
-    href: '/register',
-    highlight: false,
-  },
-  {
-    name: 'Premium',
-    price: '49 €',
-    period: '/mes',
-    description: 'Para crecer sin fricción',
-    features: ['Informes avanzados', 'CRM y tesorería', 'Contabilidad básica', 'Sin marca de agua en PDF'],
-    cta: 'Probar 14 días',
-    href: '/register',
-    highlight: true,
-  },
-  {
-    name: 'Enterprise',
-    price: '149 €',
-    period: '/mes',
-    description: 'Operaciones complejas y API',
-    features: ['Proyectos y fabricación', 'API y webhooks', 'Usuarios ilimitados', 'Soporte prioritario'],
-    cta: 'Contactar ventas',
-    href: '/contact',
-    highlight: false,
-  },
+const exploreLinks = [
+  { to: '/funcionalidades', label: 'Funcionalidades' },
+  { to: '/precios', label: 'Precios' },
+  { to: '/sobre-nosotros', label: 'Sobre nosotros' },
 ];
 
 export function LandingPage() {
@@ -42,53 +15,53 @@ export function LandingPage() {
   if (isAuthenticated) return <Navigate to="/dashboard" replace />;
 
   return (
-    <div className="space-y-16 px-6 py-16">
-      <section className="mx-auto max-w-3xl text-center">
-        <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-          Ventas, stock y facturación en un solo lugar
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Empieza en minutos. Escala cuando lo necesites.
-        </p>
-        <div className="mt-8 flex justify-center">
-          <Link to="/register">
-            <Button className="px-6 py-3 text-base">Crear cuenta gratis</Button>
-          </Link>
+    <div className="flex flex-1 flex-col justify-center px-6 py-12 sm:py-16">
+      <section className="mx-auto grid w-full max-w-6xl items-center gap-10 lg:grid-cols-2 lg:gap-14">
+        <div>
+          <p className="mb-3 text-sm font-medium uppercase tracking-wide text-primary">
+            ERP en la nube
+          </p>
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-[3.25rem] lg:leading-tight">
+            Ventas, stock y facturación en un solo lugar
+          </h1>
+          <p className="mt-5 text-lg leading-relaxed text-muted-foreground">
+            Domo es un sistema integral para gestionar tu negocio: pedidos, inventario, clientes e
+            informes desde un único panel, sin hojas de cálculo ni herramientas sueltas.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Link to="/register">
+              <Button className="px-6 py-3 text-base shadow-soft">
+                Crear cuenta gratis
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+            <Link to="/funcionalidades">
+              <Button variant="secondary" className="px-6 py-3 text-base">
+                Ver funcionalidades
+              </Button>
+            </Link>
+          </div>
+          <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-sm text-muted-foreground">
+            <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />
+            Prueba gratis 14 días · Sin tarjeta de crédito
+          </p>
+          <nav
+            aria-label="Explorar Domo"
+            className="mt-8 flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground"
+          >
+            {exploreLinks.map((link, i) => (
+              <span key={link.to} className="inline-flex items-center gap-4">
+                {i > 0 && <span className="hidden text-border sm:inline">·</span>}
+                <Link to={link.to} className="font-medium hover:text-primary">
+                  {link.label}
+                </Link>
+              </span>
+            ))}
+          </nav>
         </div>
-      </section>
 
-      <section id="pricing" className="mx-auto max-w-5xl">
-        <div className="mb-8 text-center">
-          <h2 className="text-2xl font-bold">Planes</h2>
-          <p className="mt-2 text-muted-foreground">14 días de Premium al registrarte</p>
-        </div>
-        <div className="grid gap-6 md:grid-cols-3">
-          {plans.map((plan) => (
-            <Card
-              key={plan.name}
-              className={`flex flex-col p-6 ${plan.highlight ? 'border-primary shadow-card ring-1 ring-primary/20' : ''}`}
-            >
-              <h3 className="text-lg font-semibold">{plan.name}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{plan.description}</p>
-              <p className="mt-4">
-                <span className="text-3xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground">{plan.period}</span>
-              </p>
-              <ul className="mt-6 flex-1 space-y-2 text-sm">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link to={plan.href} className="mt-6 block">
-                <Button className="w-full" variant={plan.highlight ? 'primary' : 'secondary'}>
-                  {plan.cta}
-                </Button>
-              </Link>
-            </Card>
-          ))}
+        <div className="lg:pl-2">
+          <LandingDashboardPreview />
         </div>
       </section>
     </div>

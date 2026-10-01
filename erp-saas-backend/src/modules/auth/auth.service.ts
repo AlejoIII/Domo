@@ -274,7 +274,8 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    const tokens = await this.issueTokens(user.id, user.email, user.companyId);
+    const rememberMe = dto.rememberMe !== false;
+    const tokens = await this.issueTokens(user.id, user.email, user.companyId, rememberMe);
     const full = await this.usersRepo.findById(user.id);
     const companyMeta = await this.getCompanyMeta(user.companyId);
     return {
@@ -359,7 +360,8 @@ export class AuthService {
       data: { lastLoginAt: new Date() },
     });
 
-    const tokens = await this.issueTokens(user.id, user.email, user.companyId);
+    const rememberMe = dto.rememberMe !== false;
+    const tokens = await this.issueTokens(user.id, user.email, user.companyId, rememberMe);
     const companyMeta = await this.getCompanyMeta(user.companyId);
     return {
       user: this.toPublicUser(user, companyMeta?.name, companyMeta),
@@ -457,6 +459,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken: rotated.newRefreshToken,
+      rememberMe: rotated.rememberMe,
     };
   }
 
@@ -609,12 +612,13 @@ export class AuthService {
     }
   }
 
-  private async issueTokens(sub: string, email: string, companyId: string) {
+  private async issueTokens(sub: string, email: string, companyId: string, rememberMe = true) {
     const payload = { sub, email, companyId };
-    const refreshToken = await this.refreshTokens.create(sub, companyId);
+    const refreshToken = await this.refreshTokens.create(sub, companyId, rememberMe);
     return {
       accessToken: this.jwtService.sign(payload),
       refreshToken,
+      rememberMe,
     };
   }
 }

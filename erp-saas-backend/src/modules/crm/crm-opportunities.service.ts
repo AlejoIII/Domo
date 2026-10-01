@@ -31,10 +31,12 @@ export class CrmOpportunitiesService {
     await this.stages.ensureDefaultStages(companyId);
     const stages = await this.stages.listStages(companyId);
     const opportunities = await this.prisma.crmOpportunity.findMany({
-      where: { companyId, status: 'open' },
+      where: { companyId },
       include: opportunityInclude,
       orderBy: { updatedAt: 'desc' },
     });
+
+    const openOpportunities = opportunities.filter((o) => o.status === 'open');
 
     return {
       stages: stages.map((s) => ({
@@ -49,8 +51,8 @@ export class CrmOpportunitiesService {
           .map((o) => this.mapOpportunity(o)),
       })),
       summary: {
-        totalOpen: opportunities.length,
-        totalValue: opportunities.reduce((sum, o) => sum + Number(o.amount ?? 0), 0),
+        totalOpen: openOpportunities.length,
+        totalValue: openOpportunities.reduce((sum, o) => sum + Number(o.amount ?? 0), 0),
       },
     };
   }

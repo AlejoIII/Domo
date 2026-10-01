@@ -1,0 +1,4 @@
+nombre;email;telefono;nif;direccion;ciudad;cp;pais;notas
+Taller López S.L.;contacto@tallerlopez.demo;912345678;B12345678;Av. Industria 8;Getafe;28901;ES;Cliente import demo
+María García (autónoma);maria.garcia.demo@email.com;600111222;12345678Z;C/ Sol 3;Sevilla;41001;ES;
+Distribuciones Norte;compras@distnorte.demo;981000000;A98765432;Pol. Empresarial 2;A Coruña;15008;ES;Pago a 30 días

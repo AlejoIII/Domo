@@ -5,6 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "screenshots:marketing": "node scripts/capture-marketing-screenshots.mjs",
+    "manuals:prepare": "playwright install chromium",
+    "manuals:screenshots": "node scripts/capture-manual-screenshots.mjs",
+    "manuals:build": "npm run manuals:prepare && node scripts/run-manuals-build.mjs",
+    "manuals:build:auto": "npm run manuals:prepare && node scripts/run-manuals-build-auto.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",

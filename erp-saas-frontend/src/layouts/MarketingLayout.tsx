@@ -1,38 +1,48 @@
-import { Suspense } from 'react';
 import { Link, Outlet } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { Loader } from '@/components/ui/Loader';
+import { DomoLogo } from '@/components/brand/DomoLogo';
+
+const navLinkClass =
+  'hidden text-sm text-muted-foreground hover:text-foreground md:inline';
 
 export function MarketingLayout() {
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="border-b border-border/60 bg-card/60 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <Link to="/" className="font-semibold text-primary">Domo</Link>
-          <nav className="flex items-center gap-2">
-            <Link to="/#pricing" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-4 px-6">
+          <Link to="/" className="flex shrink-0 items-center">
+            <DomoLogo className="h-8" decorative={false} />
+          </Link>
+          <nav className="flex flex-1 items-center justify-center gap-3 lg:gap-6">
+            <Link to="/funcionalidades" className={navLinkClass}>
+              Funcionalidades
+            </Link>
+            <Link to="/precios" className={navLinkClass}>
               Precios
             </Link>
-            <Link to="/contact" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">
+            <Link to="/status" className={navLinkClass}>
+              Recursos
+            </Link>
+            <Link to="/sobre-nosotros" className={navLinkClass}>
+              Sobre nosotros
+            </Link>
+            <Link to="/contact" className={navLinkClass}>
               Contacto
             </Link>
-            <Link to="/status" className="hidden text-sm text-muted-foreground hover:text-foreground sm:inline">
-              Estado
-            </Link>
-            <Link to="/login">
-              <Button variant="ghost">Entrar</Button>
+          </nav>
+          <div className="flex shrink-0 items-center gap-2">
+            <Link to="/login" className="hidden sm:inline">
+              <Button variant="ghost">Iniciar sesión</Button>
             </Link>
             <Link to="/register">
-              <Button>Probar gratis</Button>
+              <Button>Crear cuenta gratis</Button>
             </Link>
-          </nav>
+          </div>
         </div>
       </header>
 
-      <main className="flex-1">
-        <Suspense fallback={<div className="flex min-h-[40vh] items-center justify-center"><Loader /></div>}>
-          <Outlet />
-        </Suspense>
+      <main className="flex flex-1 flex-col">
+        <Outlet />
       </main>
 
       <footer className="border-t border-border/60 bg-muted/30">
