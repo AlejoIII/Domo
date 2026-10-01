@@ -1,0 +1,187 @@
+{
+  "generatedAt": "2026-09-11T21:38:03.865Z",
+  "meta": {
+    "product": "Domo ERP",
+    "version": "1.1",
+    "locale": "es-ES",
+    "supportHint": "¿Necesitas ayuda? Contacta al administrador de tu empresa o escribe a soporte desde la web de Domo. Guarda estos PDF y compártelos con nuevos usuarios."
+  },
+  "manuals": [
+    {
+      "id": "introduccion",
+      "title": "Primeros pasos en Domo",
+      "module": "General",
+      "file": "domo-manual-introduccion.pdf",
+      "summary": "Esta guía explica cómo entrar en Domo, orientarte por el menú, usar atajos y cerrar sesión de forma segura. Está pensada para usuarios nuevos que acaban de recibir una invitación o credenciales de su empresa.",
+      "planNote": null
+    },
+    {
+      "id": "dashboard",
+      "title": "Panel de control (Dashboard)",
+      "module": "Inicio",
+      "file": "domo-manual-dashboard.pdf",
+      "summary": "El Dashboard concentra indicadores y alertas del día a día: cobros pendientes, pedidos por preparar, stock crítico y evolución de ventas. Úsalo como punto de partida cada mañana.",
+      "planNote": null
+    },
+    {
+      "id": "clientes",
+      "title": "Clientes",
+      "module": "Ventas",
+      "file": "domo-manual-clientes.pdf",
+      "summary": "La ficha de cliente centraliza datos fiscales, contacto y relación con presupuestos, pedidos y facturas. Mantener clientes bien definidos evita errores en documentos y CRM.",
+      "planNote": null
+    },
+    {
+      "id": "pedidos",
+      "title": "Pedidos de venta",
+      "module": "Ventas",
+      "file": "domo-manual-pedidos.pdf",
+      "summary": "Los pedidos registran la intención de compra confirmada: líneas, precios, almacén y estados logísticos. Son el puente entre presupuesto aceptado y factura.",
+      "planNote": null
+    },
+    {
+      "id": "facturas",
+      "title": "Facturas",
+      "module": "Ventas",
+      "file": "domo-manual-facturas.pdf",
+      "summary": "Las facturas formalizan la venta ante el cliente y alimentan informes financieros. Domo genera PDF en servidor y permite registrar cobros.",
+      "planNote": null
+    },
+    {
+      "id": "presupuestos",
+      "title": "Presupuestos",
+      "module": "Ventas",
+      "file": "domo-manual-presupuestos.pdf",
+      "summary": "Los presupuestos (ofertas) capturan propuestas comerciales antes del pedido. Permiten negociar y convertir en venta con un clic.",
+      "planNote": null
+    },
+    {
+      "id": "productos",
+      "title": "Productos",
+      "module": "Inventario",
+      "file": "domo-manual-productos.pdf",
+      "summary": "El catálogo de productos alimenta pedidos, facturas y stock. Define SKU, precios, impuestos y mínimos por almacén.",
+      "planNote": null
+    },
+    {
+      "id": "categorias",
+      "title": "Categorías de producto",
+      "module": "Inventario",
+      "file": "domo-manual-categorias.pdf",
+      "summary": "Organiza el catálogo en familias para filtros, informes y navegación más clara.",
+      "planNote": null
+    },
+    {
+      "id": "almacenes",
+      "title": "Almacenes",
+      "module": "Inventario",
+      "file": "domo-manual-almacenes.pdf",
+      "summary": "Representa ubicaciones físicas o lógicas donde guardas stock.",
+      "planNote": null
+    },
+    {
+      "id": "movimientos-stock",
+      "title": "Movimientos de stock",
+      "module": "Inventario",
+      "file": "domo-manual-movimientos-stock.pdf",
+      "summary": "Registra entradas, salidas y ajustes con trazabilidad.",
+      "planNote": null
+    },
+    {
+      "id": "proveedores",
+      "title": "Proveedores",
+      "module": "Compras",
+      "file": "domo-manual-proveedores.pdf",
+      "summary": "Directorio de proveedores para órdenes de compra y pagos.",
+      "planNote": null
+    },
+    {
+      "id": "ordenes-compra",
+      "title": "Órdenes de compra",
+      "module": "Compras",
+      "file": "domo-manual-ordenes-compra.pdf",
+      "summary": "Documenta compras a proveedor y recepción de mercancía.",
+      "planNote": null
+    },
+    {
+      "id": "informe-ventas",
+      "title": "Informe de ventas",
+      "module": "Informes",
+      "file": "domo-manual-informe-ventas.pdf",
+      "summary": "Analiza pedidos, presupuestos y clientes en un periodo.",
+      "planNote": "Requiere plan Premium o trial."
+    },
+    {
+      "id": "informe-finanzas",
+      "title": "Informe financiero",
+      "module": "Informes",
+      "file": "domo-manual-informe-finanzas.pdf",
+      "summary": "Visión de facturación, cobros y pendientes.",
+      "planNote": "Requiere plan Premium o trial."
+    },
+    {
+      "id": "valoracion-stock",
+      "title": "Valoración de stock",
+      "module": "Informes",
+      "file": "domo-manual-valoracion-stock.pdf",
+      "summary": "Valor económico del inventario.",
+      "planNote": "Requiere plan Premium o trial."
+    },
+    {
+      "id": "contabilidad",
+      "title": "Contabilidad básica",
+      "module": "Contabilidad",
+      "file": "domo-manual-contabilidad.pdf",
+      "summary": "Consulta asientos y resúmenes contables simplificados.",
+      "planNote": "Módulo Premium."
+    },
+    {
+      "id": "crm",
+      "title": "CRM y pipeline",
+      "module": "CRM",
+      "file": "domo-manual-crm.pdf",
+      "summary": "Gestiona oportunidades comerciales en tablero kanban.",
+      "planNote": "Módulo Premium."
+    },
+    {
+      "id": "tesoreria",
+      "title": "Tesorería",
+      "module": "Tesorería",
+      "file": "domo-manual-tesoreria.pdf",
+      "summary": "Saldos bancarios y movimientos de caja.",
+      "planNote": "Módulo Premium."
+    },
+    {
+      "id": "proyectos",
+      "title": "Proyectos",
+      "module": "Proyectos",
+      "file": "domo-manual-proyectos.pdf",
+      "summary": "Seguimiento de proyectos y costes asociados.",
+      "planNote": "Plan Enterprise."
+    },
+    {
+      "id": "fabricacion",
+      "title": "Fabricación",
+      "module": "Fabricación",
+      "file": "domo-manual-fabricacion.pdf",
+      "summary": "Órdenes de fabricación y consumo de materiales.",
+      "planNote": "Plan Enterprise."
+    },
+    {
+      "id": "empleados",
+      "title": "Empleados",
+      "module": "RRHH",
+      "file": "domo-manual-empleados.pdf",
+      "summary": "Fichas de empleados vinculadas a usuarios.",
+      "planNote": null
+    },
+    {
+      "id": "configuracion",
+      "title": "Configuración de la empresa",
+      "module": "Administración",
+      "file": "domo-manual-configuracion.pdf",
+      "summary": "Centro de ajustes: empresa, usuarios, roles, facturación Domo y seguridad.",
+      "planNote": null
+    }
+  ]
+}

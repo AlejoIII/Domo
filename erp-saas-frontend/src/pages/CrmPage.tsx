@@ -65,7 +65,7 @@ export function CrmPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 max-w-full space-y-6">
       {dialog}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -167,8 +167,8 @@ function PipelineTab({ onDirtyChange }: { onDirtyChange?: (dirty: boolean) => vo
   const clients = clientsData?.items ?? [];
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-3">
+    <div className="min-w-0 max-w-full space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 lg:max-w-2xl">
         <Card className="p-4">
           <p className="text-sm text-muted-foreground">Oportunidades abiertas</p>
           <p className="text-2xl font-bold">{data.summary.totalOpen}</p>
@@ -224,44 +224,46 @@ function PipelineTab({ onDirtyChange }: { onDirtyChange?: (dirty: boolean) => vo
         </Button>
       </Card>
 
-      <div className="flex gap-4 overflow-x-auto pb-2">
-        {data.stages.map((stage) => (
-          <div
-            key={stage.id}
-            className="min-w-[280px] flex-shrink-0 rounded-lg border border-border/60 bg-muted/20"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={() => {
-              if (draggingId) {
-                moveMutation.mutate({ id: draggingId, stageId: stage.id });
-                setDraggingId(null);
-              }
-            }}
-          >
+      <div className="w-full min-w-0 overflow-x-auto overscroll-x-contain rounded-lg pb-1">
+        <div className="inline-flex min-w-full items-start gap-3 pb-2 md:min-w-max md:gap-4">
+          {data.stages.map((stage) => (
             <div
-              className="border-b border-border/60 px-3 py-2"
-              style={{ borderTopColor: stage.color, borderTopWidth: 3 }}
+              key={stage.id}
+              className="flex w-[min(100%,17.5rem)] min-w-[240px] max-w-[280px] flex-shrink-0 flex-col rounded-lg border border-border/60 bg-muted/20 sm:w-[280px]"
+              onDragOver={(e) => e.preventDefault()}
+              onDrop={() => {
+                if (draggingId) {
+                  moveMutation.mutate({ id: draggingId, stageId: stage.id });
+                  setDraggingId(null);
+                }
+              }}
             >
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="font-semibold">{stage.name}</h3>
-                <Badge variant="muted">{stage.opportunities.length}</Badge>
+              <div
+                className="shrink-0 border-b border-border/60 px-3 py-2"
+                style={{ borderTopColor: stage.color, borderTopWidth: 3 }}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="truncate font-semibold">{stage.name}</h3>
+                  <Badge variant="muted">{stage.opportunities.length}</Badge>
+                </div>
+              </div>
+              <div className="max-h-[min(520px,calc(100vh-18rem))] min-h-[140px] flex-1 space-y-2 overflow-y-auto p-2">
+                {stage.opportunities.map((opp) => (
+                  <OpportunityCard
+                    key={opp.id}
+                    opp={opp}
+                    onDragStart={() => setDraggingId(opp.id)}
+                    onConvertQuote={() => quoteMutation.mutate(opp.id)}
+                    converting={quoteMutation.isPending}
+                  />
+                ))}
+                {stage.opportunities.length === 0 && (
+                  <p className="px-2 py-4 text-center text-xs text-muted-foreground">Vacío</p>
+                )}
               </div>
             </div>
-            <div className="space-y-2 p-2">
-              {stage.opportunities.map((opp) => (
-                <OpportunityCard
-                  key={opp.id}
-                  opp={opp}
-                  onDragStart={() => setDraggingId(opp.id)}
-                  onConvertQuote={() => quoteMutation.mutate(opp.id)}
-                  converting={quoteMutation.isPending}
-                />
-              ))}
-              {stage.opportunities.length === 0 && (
-                <p className="px-2 py-4 text-center text-xs text-muted-foreground">Vacío</p>
-              )}
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

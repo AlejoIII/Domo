@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" fill="none" role="img" aria-label="Domo">
+  <g transform="translate(36 8) scale(2)">
+    <path fill="#003D2E" d="M38 10h6l4 4v40l-4 4h-6V10Z" />
+    <path fill="#003D2E" d="M10 38h44l4 4H14l-4-4Z" />
+    <path fill="#008B65" d="M26 10h12v16H26V10Z" />
+    <path fill="#008B65" d="M26 38h12v16H26V38Z" />
+    <path fill="#008B65" d="M10 26h16v12H10V26Z" />
+    <path fill="#008B65" d="M38 26h16v12H38V26Z" />
+    <path fill="#008B65" d="M26 26h12v12H26V26Z" />
+  </g>
+  <text
+    x="100"
+    y="168"
+    fill="#008B65"
+    text-anchor="middle"
+    font-family="Segoe UI, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif"
+    font-size="42"
+    font-weight="700"
+    letter-spacing="0.14em"
+  >
+    DOMO
+  </text>
+  <text
+    x="100"
+    y="198"
+    fill="#003D2E"
+    text-anchor="middle"
+    font-family="Segoe UI, system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif"
+    font-size="14"
+    font-weight="500"
+    letter-spacing="0.28em"
+  >
+    DESDE 2026
+  </text>
+</svg>

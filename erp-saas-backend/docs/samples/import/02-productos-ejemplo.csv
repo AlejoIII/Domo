@@ -1,0 +1,6 @@
+codigo;nombre;precio;coste;stock;stock_minimo;categoria;almacen;descripcion
+PROD-DEMO-001;Tornillo M6 inox;0.15;0.08;500;50;Ferretería;ALM-DEMO-01;Caja 100 uds
+PROD-DEMO-002;Tuerca M6;0.10;0.05;800;80;Ferretería;ALM-DEMO-01;
+PROD-DEMO-003;Arandela plana 6mm;0.05;0.02;1200;100;Ferretería;ALM-DEMO-01;
+PROD-DEMO-004;Kit montaje básico;24.90;12.00;25;5;Kits;ALM-DEMO-02;Incluye herramienta manual
+PROD-DEMO-005;Servicio instalación (hora);45.00;0;0;0;Servicios;ALM-DEMO-02;Sin stock físico

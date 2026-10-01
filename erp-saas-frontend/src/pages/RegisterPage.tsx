@@ -16,6 +16,7 @@ import {
   validateBetaInvite,
 } from '@/services/auth.service';
 import { getPostAuthPath } from '@/lib/auth-routes';
+import { DomoLogo } from '@/components/brand/DomoLogo';
 
 const schema = z
   .object({
@@ -159,7 +160,7 @@ export function RegisterPage() {
 
   return (
     <Card className="border-border/60 p-8 shadow-card">
-      <p className="mb-1 text-sm font-medium text-primary">Domo</p>
+      <DomoLogo variant="stacked" className="mb-2" decorative={false} />
       <h1 className="mb-2 text-2xl font-bold tracking-tight">Registrar empresa</h1>
       <p className="mb-6 text-sm text-muted-foreground">
         {inviteQuery.data

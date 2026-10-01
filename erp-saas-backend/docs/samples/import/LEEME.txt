@@ -1,0 +1,20 @@
+Importación masiva — archivos de prueba Domo ERP
+================================================
+
+Orden de importación (importante):
+  1) 01-almacenes-ejemplo.csv
+  2) 02-productos-ejemplo.csv   (columna "almacen" usa códigos del paso 1)
+  3) 03-clientes-ejemplo.csv
+
+Dónde importar en la app:
+  Configuración → pestaña "Importación"
+  (o /settings?tab=import)
+
+Consejos:
+  - Codigos PROD-DEMO-* y ALM-DEMO-* evitan choque con datos del onboarding.
+  - Si una fila falla por duplicado, cambia el "codigo" o borra el registro existente.
+  - Primero usa "Validar sin guardar", luego "Importar".
+  - Separador: punto y coma (;). Guardar CSV como UTF-8 en Excel/LibreOffice.
+
+Ruta de estos archivos:
+  erp-saas-backend/docs/samples/import/

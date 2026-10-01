@@ -1,7 +1,8 @@
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-import { AlertTriangle, Download, Trash2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { AlertTriangle, Download, FileSpreadsheet, Trash2 } from 'lucide-react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -97,6 +98,26 @@ export function PrivacySettingsSection() {
             {error}
           </p>
         )}
+
+        <div className="rounded-lg border border-border/60 p-4">
+          <h3 className="font-medium">Importar datos (CSV)</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Carga almacenes, productos o clientes desde una plantilla CSV. Recomendado después de
+            configurar IVA y prefijos en el asistente inicial.
+          </p>
+          {isAdmin ? (
+            <Link to="/settings?tab=import" className="mt-3 inline-block">
+              <Button type="button" variant="secondary">
+                <FileSpreadsheet className="h-4 w-4" />
+                Abrir importación masiva
+              </Button>
+            </Link>
+          ) : (
+            <p className="mt-2 text-xs text-muted-foreground">
+              Solo administradores pueden importar datos masivamente.
+            </p>
+          )}
+        </div>
 
         <div className="rounded-lg border border-border/60 p-4">
           <h3 className="font-medium">Exportar todos los datos</h3>

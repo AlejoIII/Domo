@@ -4,6 +4,7 @@ import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../../common/database/prisma.service';
 
 const DEFAULT_REFRESH_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const DEFAULT_SESSION_REFRESH_TTL_MS = 24 * 60 * 60 * 1000;
 
 @Injectable()
 export class RefreshTokenService {
@@ -16,16 +17,21 @@ export class RefreshTokenService {
     return createHash('sha256').update(raw).digest('hex');
   }
 
-  private getRefreshTtlMs(): number {
+  private getRefreshTtlMs(rememberMe = true): number {
+    if (!rememberMe) {
+      const sessionDays = Number(this.config.get('JWT_REFRESH_SESSION_DAYS', '1'));
+      if (!Number.isFinite(sessionDays) || sessionDays <= 0) return DEFAULT_SESSION_REFRESH_TTL_MS;
+      return sessionDays * 24 * 60 * 60 * 1000;
+    }
     const days = Number(this.config.get('JWT_REFRESH_EXPIRES_DAYS', '7'));
     if (!Number.isFinite(days) || days <= 0) return DEFAULT_REFRESH_TTL_MS;
     return days * 24 * 60 * 60 * 1000;
   }
 
-  async create(userId: string, companyId: string): Promise<string> {
+  async create(userId: string, companyId: string, rememberMe = true): Promise<string> {
     const raw = randomBytes(32).toString('hex');
     const token = this.hashToken(raw);
-    const expiresAt = new Date(Date.now() + this.getRefreshTtlMs());
+    const expiresAt = new Date(Date.now() + this.getRefreshTtlMs(rememberMe));
 
     await this.prisma.refreshToken.create({
       data: { token, userId, companyId, expiresAt },
@@ -39,6 +45,7 @@ export class RefreshTokenService {
     email: string;
     companyId: string;
     newRefreshToken: string;
+    rememberMe: boolean;
   }> {
     const hash = this.hashToken(rawToken);
     const record = await this.prisma.refreshToken.findUnique({
@@ -68,13 +75,15 @@ export class RefreshTokenService {
       data: { revokedAt: new Date() },
     });
 
-    const newRefreshToken = await this.create(record.userId, record.companyId);
+    const rememberMe = record.expiresAt.getTime() - record.createdAt.getTime() > 36 * 60 * 60 * 1000;
+    const newRefreshToken = await this.create(record.userId, record.companyId, rememberMe);
 
     return {
       userId: record.userId,
       email: record.user.email,
       companyId: record.companyId,
       newRefreshToken,
+      rememberMe,
     };
   }
 

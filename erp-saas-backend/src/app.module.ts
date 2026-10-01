@@ -50,6 +50,8 @@ import { TreasuryModule } from './modules/treasury/treasury.module';
 import { CrmModule } from './modules/crm/crm.module';
 import { ProjectsModule } from './modules/projects/projects.module';
 import { ManufacturingModule } from './modules/manufacturing/manufacturing.module';
+import { AssistantModule } from './modules/assistant/assistant.module';
+import { DataImportModule } from './modules/data-import/data-import.module';
 
 @Module({
   imports: [
@@ -112,6 +114,8 @@ import { ManufacturingModule } from './modules/manufacturing/manufacturing.modul
     CrmModule,
     ProjectsModule,
     ManufacturingModule,
+    AssistantModule,
+    DataImportModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
 })

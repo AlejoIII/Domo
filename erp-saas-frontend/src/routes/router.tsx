@@ -1,4 +1,3 @@
-import { lazy } from 'react';
 import { createBrowserRouter, type RouteObject } from 'react-router-dom';
 import { RootLayout } from '@/layouts/RootLayout';
 import { AuthLayout } from '@/layouts/AuthLayout';
@@ -6,73 +5,77 @@ import { DashboardLayout } from '@/layouts/DashboardLayout';
 import { MarketingLayout } from '@/layouts/MarketingLayout';
 import { ProtectedRoute } from '@/routes/ProtectedRoute';
 import { GuestRoute } from '@/routes/GuestRoute';
+import { LoginPage } from '@/pages/LoginPage';
+import { RegisterPage } from '@/pages/RegisterPage';
+import { VerifyEmailPage } from '@/pages/VerifyEmailPage';
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
+import { AcceptInvitePage } from '@/pages/AcceptInvitePage';
+import { LandingPage } from '@/pages/LandingPage';
+import { FeaturesPage } from '@/pages/FeaturesPage';
+import { PricingPage } from '@/pages/PricingPage';
+import { AboutPage } from '@/pages/AboutPage';
+import { ContactPage } from '@/pages/ContactPage';
+import { TermsPage } from '@/pages/TermsPage';
+import { PrivacyPage } from '@/pages/PrivacyPage';
+import { CookiesPage } from '@/pages/CookiesPage';
+import { StatusPage } from '@/pages/StatusPage';
+import { DashboardPage } from '@/pages/DashboardPage';
+import { ClientsPage } from '@/pages/ClientsPage';
+import { ProductsPage } from '@/pages/ProductsPage';
+import { SuppliersPage } from '@/pages/SuppliersPage';
+import { CategoriesPage } from '@/pages/CategoriesPage';
+import { WarehousesPage } from '@/pages/WarehousesPage';
+import { OrdersPage } from '@/pages/OrdersPage';
+import { InvoicesPage } from '@/pages/InvoicesPage';
+import { QuotesPage } from '@/pages/QuotesPage';
+import { PurchaseOrdersPage } from '@/pages/PurchaseOrdersPage';
+import { SalesReportPage } from '@/pages/SalesReportPage';
+import { FinanceReportPage } from '@/pages/FinanceReportPage';
+import { AccountingPage } from '@/pages/AccountingPage';
+import { TreasuryPage } from '@/pages/TreasuryPage';
+import { DataImportPage } from '@/pages/DataImportPage';
+import { CrmPage } from '@/pages/CrmPage';
+import { CrmSettingsHubPage } from '@/pages/crm/CrmSettingsHubPage';
+import { CrmStagesPage } from '@/pages/crm/CrmStagesPage';
+import { CrmCatalogPage } from '@/pages/crm/CrmCatalogPage';
+import { CrmTemplatesPage } from '@/pages/crm/CrmTemplatesPage';
+import { CrmTemplatesRedirect } from '@/pages/crm/CrmTemplatesRedirect';
+import { CrmEmailSettingsPage } from '@/pages/crm/CrmEmailSettingsPage';
+import { CrmAcreliaPage } from '@/pages/crm/CrmAcreliaPage';
+import { ProjectsPage } from '@/pages/ProjectsPage';
+import { ManufacturingPage } from '@/pages/ManufacturingPage';
+import { StockMovementsPage } from '@/pages/StockMovementsPage';
+import { StockValuationReportPage } from '@/pages/StockValuationReportPage';
+import { ClientFormPage } from '@/features/clients/ClientFormPage';
+import { ProductFormPage } from '@/features/products/ProductFormPage';
+import { SupplierFormPage } from '@/features/suppliers/SupplierFormPage';
+import { CategoryFormPage } from '@/features/categories/CategoryFormPage';
+import { WarehouseFormPage } from '@/features/warehouses/WarehouseFormPage';
+import { OrderFormPage } from '@/features/orders/OrderFormPage';
+import { DocumentPrintPage } from '@/pages/DocumentPrintPage';
+import { InvoiceFormPage } from '@/features/invoices/InvoiceFormPage';
+import { QuoteFormPage } from '@/features/quotes/QuoteFormPage';
+import { PurchaseOrderFormPage } from '@/features/purchase-orders/PurchaseOrderFormPage';
+import { EmployeesPage } from '@/pages/EmployeesPage';
+import { EmployeeFormPage } from '@/features/employees/EmployeeFormPage';
+import { NotFoundPage } from '@/pages/NotFoundPage';
 import { PlaceholderPage } from '@/pages/PlaceholderPage';
+import { SettingsPage } from '@/pages/SettingsPage';
+import { HelpManualsPage } from '@/pages/HelpManualsPage';
 import { OnboardingGate } from '@/routes/OnboardingGate';
+import { OnboardingPage } from '@/pages/OnboardingPage';
+import { PlanLimitPage } from '@/pages/PlanLimitPage';
 import { PlatformAdminRoute } from '@/routes/PlatformAdminRoute';
 import { PlatformLayout } from '@/layouts/PlatformLayout';
+import { PlatformDashboardPage } from '@/pages/platform/PlatformDashboardPage';
+import { PlatformCompaniesPage } from '@/pages/platform/PlatformCompaniesPage';
+import { PlatformCompanyDetailPage } from '@/pages/platform/PlatformCompanyDetailPage';
+import { PlatformUsersPage } from '@/pages/platform/PlatformUsersPage';
+import { PlatformBillingPage } from '@/pages/platform/PlatformBillingPage';
+import { PlatformSystemPage } from '@/pages/platform/PlatformSystemPage';
+import { PlatformBetaPage } from '@/pages/platform/PlatformBetaPage';
 import { getMenuRoutes } from '@/config/menu.config';
-
-const LoginPage = lazy(() => import('@/pages/LoginPage').then((m) => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import('@/pages/RegisterPage').then((m) => ({ default: m.RegisterPage })));
-const VerifyEmailPage = lazy(() => import('@/pages/VerifyEmailPage').then((m) => ({ default: m.VerifyEmailPage })));
-const ForgotPasswordPage = lazy(() => import('@/pages/ForgotPasswordPage').then((m) => ({ default: m.ForgotPasswordPage })));
-const ResetPasswordPage = lazy(() => import('@/pages/ResetPasswordPage').then((m) => ({ default: m.ResetPasswordPage })));
-const AcceptInvitePage = lazy(() => import('@/pages/AcceptInvitePage').then((m) => ({ default: m.AcceptInvitePage })));
-const LandingPage = lazy(() => import('@/pages/LandingPage').then((m) => ({ default: m.LandingPage })));
-const ContactPage = lazy(() => import('@/pages/ContactPage').then((m) => ({ default: m.ContactPage })));
-const TermsPage = lazy(() => import('@/pages/TermsPage').then((m) => ({ default: m.TermsPage })));
-const PrivacyPage = lazy(() => import('@/pages/PrivacyPage').then((m) => ({ default: m.PrivacyPage })));
-const CookiesPage = lazy(() => import('@/pages/CookiesPage').then((m) => ({ default: m.CookiesPage })));
-const StatusPage = lazy(() => import('@/pages/StatusPage').then((m) => ({ default: m.StatusPage })));
-const DashboardPage = lazy(() => import('@/pages/DashboardPage').then((m) => ({ default: m.DashboardPage })));
-const ClientsPage = lazy(() => import('@/pages/ClientsPage').then((m) => ({ default: m.ClientsPage })));
-const ProductsPage = lazy(() => import('@/pages/ProductsPage').then((m) => ({ default: m.ProductsPage })));
-const SuppliersPage = lazy(() => import('@/pages/SuppliersPage').then((m) => ({ default: m.SuppliersPage })));
-const CategoriesPage = lazy(() => import('@/pages/CategoriesPage').then((m) => ({ default: m.CategoriesPage })));
-const WarehousesPage = lazy(() => import('@/pages/WarehousesPage').then((m) => ({ default: m.WarehousesPage })));
-const OrdersPage = lazy(() => import('@/pages/OrdersPage').then((m) => ({ default: m.OrdersPage })));
-const InvoicesPage = lazy(() => import('@/pages/InvoicesPage').then((m) => ({ default: m.InvoicesPage })));
-const QuotesPage = lazy(() => import('@/pages/QuotesPage').then((m) => ({ default: m.QuotesPage })));
-const PurchaseOrdersPage = lazy(() => import('@/pages/PurchaseOrdersPage').then((m) => ({ default: m.PurchaseOrdersPage })));
-const SalesReportPage = lazy(() => import('@/pages/SalesReportPage').then((m) => ({ default: m.SalesReportPage })));
-const FinanceReportPage = lazy(() => import('@/pages/FinanceReportPage').then((m) => ({ default: m.FinanceReportPage })));
-const AccountingPage = lazy(() => import('@/pages/AccountingPage').then((m) => ({ default: m.AccountingPage })));
-const TreasuryPage = lazy(() => import('@/pages/TreasuryPage').then((m) => ({ default: m.TreasuryPage })));
-const CrmPage = lazy(() => import('@/pages/CrmPage').then((m) => ({ default: m.CrmPage })));
-const CrmSettingsHubPage = lazy(() => import('@/pages/crm/CrmSettingsHubPage').then((m) => ({ default: m.CrmSettingsHubPage })));
-const CrmStagesPage = lazy(() => import('@/pages/crm/CrmStagesPage').then((m) => ({ default: m.CrmStagesPage })));
-const CrmCatalogPage = lazy(() => import('@/pages/crm/CrmCatalogPage').then((m) => ({ default: m.CrmCatalogPage })));
-const CrmTemplatesPage = lazy(() => import('@/pages/crm/CrmTemplatesPage').then((m) => ({ default: m.CrmTemplatesPage })));
-const CrmTemplatesRedirect = lazy(() => import('@/pages/crm/CrmTemplatesRedirect').then((m) => ({ default: m.CrmTemplatesRedirect })));
-const CrmEmailSettingsPage = lazy(() => import('@/pages/crm/CrmEmailSettingsPage').then((m) => ({ default: m.CrmEmailSettingsPage })));
-const CrmAcreliaPage = lazy(() => import('@/pages/crm/CrmAcreliaPage').then((m) => ({ default: m.CrmAcreliaPage })));
-const ProjectsPage = lazy(() => import('@/pages/ProjectsPage').then((m) => ({ default: m.ProjectsPage })));
-const ManufacturingPage = lazy(() => import('@/pages/ManufacturingPage').then((m) => ({ default: m.ManufacturingPage })));
-const StockMovementsPage = lazy(() => import('@/pages/StockMovementsPage').then((m) => ({ default: m.StockMovementsPage })));
-const StockValuationReportPage = lazy(() => import('@/pages/StockValuationReportPage').then((m) => ({ default: m.StockValuationReportPage })));
-const ClientFormPage = lazy(() => import('@/features/clients/ClientFormPage').then((m) => ({ default: m.ClientFormPage })));
-const ProductFormPage = lazy(() => import('@/features/products/ProductFormPage').then((m) => ({ default: m.ProductFormPage })));
-const SupplierFormPage = lazy(() => import('@/features/suppliers/SupplierFormPage').then((m) => ({ default: m.SupplierFormPage })));
-const CategoryFormPage = lazy(() => import('@/features/categories/CategoryFormPage').then((m) => ({ default: m.CategoryFormPage })));
-const WarehouseFormPage = lazy(() => import('@/features/warehouses/WarehouseFormPage').then((m) => ({ default: m.WarehouseFormPage })));
-const OrderFormPage = lazy(() => import('@/features/orders/OrderFormPage').then((m) => ({ default: m.OrderFormPage })));
-const DocumentPrintPage = lazy(() => import('@/pages/DocumentPrintPage').then((m) => ({ default: m.DocumentPrintPage })));
-const InvoiceFormPage = lazy(() => import('@/features/invoices/InvoiceFormPage').then((m) => ({ default: m.InvoiceFormPage })));
-const QuoteFormPage = lazy(() => import('@/features/quotes/QuoteFormPage').then((m) => ({ default: m.QuoteFormPage })));
-const PurchaseOrderFormPage = lazy(() => import('@/features/purchase-orders/PurchaseOrderFormPage').then((m) => ({ default: m.PurchaseOrderFormPage })));
-const EmployeesPage = lazy(() => import('@/pages/EmployeesPage').then((m) => ({ default: m.EmployeesPage })));
-const EmployeeFormPage = lazy(() => import('@/features/employees/EmployeeFormPage').then((m) => ({ default: m.EmployeeFormPage })));
-const NotFoundPage = lazy(() => import('@/pages/NotFoundPage').then((m) => ({ default: m.NotFoundPage })));
-const SettingsPage = lazy(() => import('@/pages/SettingsPage').then((m) => ({ default: m.SettingsPage })));
-const OnboardingPage = lazy(() => import('@/pages/OnboardingPage').then((m) => ({ default: m.OnboardingPage })));
-const PlanLimitPage = lazy(() => import('@/pages/PlanLimitPage').then((m) => ({ default: m.PlanLimitPage })));
-const PlatformDashboardPage = lazy(() => import('@/pages/platform/PlatformDashboardPage').then((m) => ({ default: m.PlatformDashboardPage })));
-const PlatformCompaniesPage = lazy(() => import('@/pages/platform/PlatformCompaniesPage').then((m) => ({ default: m.PlatformCompaniesPage })));
-const PlatformCompanyDetailPage = lazy(() => import('@/pages/platform/PlatformCompanyDetailPage').then((m) => ({ default: m.PlatformCompanyDetailPage })));
-const PlatformUsersPage = lazy(() => import('@/pages/platform/PlatformUsersPage').then((m) => ({ default: m.PlatformUsersPage })));
-const PlatformBillingPage = lazy(() => import('@/pages/platform/PlatformBillingPage').then((m) => ({ default: m.PlatformBillingPage })));
-const PlatformSystemPage = lazy(() => import('@/pages/platform/PlatformSystemPage').then((m) => ({ default: m.PlatformSystemPage })));
-const PlatformBetaPage = lazy(() => import('@/pages/platform/PlatformBetaPage').then((m) => ({ default: m.PlatformBetaPage })));
 
 const implementedPaths = [
   '/dashboard',
@@ -110,6 +113,9 @@ const appRoutes: RouteObject[] = [
     element: <MarketingLayout />,
     children: [
       { path: '/', element: <LandingPage /> },
+      { path: '/funcionalidades', element: <FeaturesPage /> },
+      { path: '/precios', element: <PricingPage /> },
+      { path: '/sobre-nosotros', element: <AboutPage /> },
       { path: '/contact', element: <ContactPage /> },
       { path: '/terms', element: <TermsPage /> },
       { path: '/privacy', element: <PrivacyPage /> },
@@ -199,6 +205,8 @@ const appRoutes: RouteObject[] = [
           { path: 'hr/employees/:id', element: <EmployeeFormPage /> },
           ...menuRoutes,
           { path: 'settings', element: <SettingsPage /> },
+          { path: 'settings/import', element: <DataImportPage /> },
+          { path: 'help/manuals', element: <HelpManualsPage /> },
             ],
           },
         ],

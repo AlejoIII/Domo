@@ -13,6 +13,12 @@ import { fetchRegistrationConfig, login, verifyTotpLogin } from '@/services/auth
 import { applyNotificationPrefs } from '@/lib/notification-prefs';
 import { getPostAuthPath } from '@/lib/auth-routes';
 import { consumeSessionExpired, SESSION_EXPIRED_MESSAGE } from '@/lib/session-expired';
+import {
+  loadLoginRememberMe,
+  loadRememberedEmail,
+  persistLoginPreferences,
+} from '@/lib/login-remember';
+import { DomoLogo } from '@/components/brand/DomoLogo';
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -31,7 +37,12 @@ export function LoginPage() {
   const setSession = useAuthStore((s) => s.setSession);
   const [error, setError] = useState<string | null>(null);
   const [sessionExpired, setSessionExpired] = useState(false);
-  const [totpStep, setTotpStep] = useState<{ tempToken: string } | null>(null);
+  const [rememberMe, setRememberMe] = useState(() => loadLoginRememberMe());
+  const [totpStep, setTotpStep] = useState<{
+    tempToken: string;
+    rememberMe: boolean;
+    email: string;
+  } | null>(null);
 
   const registrationQuery = useQuery({
     queryKey: ['auth', 'registration-config'],
@@ -51,8 +62,11 @@ export function LoginPage() {
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: import.meta.env.DEV
-      ? { email: 'admin@demo.com', password: 'admin123' }
-      : { email: '', password: '' },
+      ? {
+          email: loadRememberedEmail() || 'admin@demo.com',
+          password: 'admin123',
+        }
+      : { email: loadRememberedEmail(), password: '' },
   });
 
   const {
@@ -81,11 +95,12 @@ export function LoginPage() {
     setError(null);
     setSessionExpired(false);
     try {
-      const session = await login(data.email, data.password);
+      const session = await login(data.email, data.password, rememberMe);
       if (session.requiresTotp && session.tempToken) {
-        setTotpStep({ tempToken: session.tempToken });
+        setTotpStep({ tempToken: session.tempToken, rememberMe, email: data.email });
         return;
       }
+      persistLoginPreferences(data.email, rememberMe);
       completeSession(session);
     } catch (err) {
       if (isAxiosError(err) && err.response?.status === 403) {
@@ -106,7 +121,8 @@ export function LoginPage() {
     if (!totpStep) return;
     setError(null);
     try {
-      const session = await verifyTotpLogin(totpStep.tempToken, data.code);
+      const session = await verifyTotpLogin(totpStep.tempToken, data.code, totpStep.rememberMe);
+      persistLoginPreferences(totpStep.email, totpStep.rememberMe);
       completeSession(session);
     } catch (err) {
       const message = isAxiosError(err)
@@ -119,7 +135,7 @@ export function LoginPage() {
   if (totpStep) {
     return (
       <Card className="border-border/60 p-8 shadow-card">
-        <p className="mb-1 text-sm font-medium text-primary">Domo</p>
+        <DomoLogo variant="stacked" className="mb-4" decorative={false} />
         <h1 className="mb-2 text-2xl font-bold tracking-tight">Verificación 2FA</h1>
         <p className="mb-6 text-sm text-muted-foreground">
           Introduce el código de 6 dígitos de tu app de autenticación.
@@ -160,7 +176,7 @@ export function LoginPage() {
 
   return (
     <Card className="border-border/60 p-8 shadow-card">
-      <p className="mb-1 text-sm font-medium text-primary">Domo</p>
+      <DomoLogo variant="stacked" className="mb-2" decorative={false} />
       <h1 className="mb-6 text-2xl font-bold tracking-tight">Iniciar sesión</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         {sessionExpired && (
@@ -175,7 +191,16 @@ export function LoginPage() {
         )}
         <Input label="Email" type="email" placeholder="usuario@empresa.com" error={errors.email?.message} {...register('email')} />
         <Input label="Contraseña" type="password" placeholder="Mínimo 6 caracteres" error={errors.password?.message} {...register('password')} />
-        <div className="flex justify-end">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+            <input
+              type="checkbox"
+              className="rounded border-border"
+              checked={rememberMe}
+              onChange={(e) => setRememberMe(e.target.checked)}
+            />
+            Recordarme
+          </label>
           <Link to="/forgot-password" className="text-sm font-medium text-primary hover:underline">
             ¿Olvidaste tu contraseña?
           </Link>
