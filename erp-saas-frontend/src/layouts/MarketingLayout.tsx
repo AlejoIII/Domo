@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { DomoLogo } from '@/components/brand/DomoLogo';
+import { InstallAppButton } from '@/components/pwa/InstallAppButton';
 
 const navLinkClass =
   'hidden text-sm text-muted-foreground hover:text-foreground md:inline';
@@ -31,6 +32,7 @@ export function MarketingLayout() {
             </Link>
           </nav>
           <div className="flex shrink-0 items-center gap-2">
+            <InstallAppButton variant="ghost" className="hidden md:inline-flex" />
             <Link to="/login" className="hidden sm:inline">
               <Button variant="ghost">Iniciar sesión</Button>
             </Link>

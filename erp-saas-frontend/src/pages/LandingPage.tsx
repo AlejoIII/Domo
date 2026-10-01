@@ -2,6 +2,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { ArrowRight, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { LandingDashboardPreview } from '@/components/marketing/LandingDashboardPreview';
+import { InstallAppButton } from '@/components/pwa/InstallAppButton';
 import { useAuthStore } from '@/store/auth.store';
 
 const exploreLinks = [
@@ -40,6 +41,10 @@ export function LandingPage() {
                 Ver funcionalidades
               </Button>
             </Link>
+            <InstallAppButton variant="secondary" className="px-6 py-3 text-base" />
+          </div>
+          <div className="mt-5">
+            <InstallAppButton showHelpWhenUnavailable />
           </div>
           <p className="mt-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-muted/30 px-3 py-1.5 text-sm text-muted-foreground">
             <ShieldCheck className="h-4 w-4 shrink-0 text-primary" />

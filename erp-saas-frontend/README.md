@@ -15,6 +15,19 @@ npm run dev
 
 **Backend requerido** para login y datos reales. Ver [erp-saas-backend/README.md](../erp-saas-backend/README.md).
 
+## PWA (app instalable sin stores)
+
+Domo se puede instalar como aplicación web (Chrome/Edge/Android; en iOS vía Safari → Compartir → “Añadir a pantalla de inicio”).
+
+Requisitos: **HTTPS** (o `localhost`) + build de producción con service worker.
+
+```bash
+npm run build
+npm run preview   # http://localhost:4173 — prueba “Instalar app” en el menú del navegador
+```
+
+En producción: despliega el `dist/` detrás de HTTPS (misma API/proxy que uses hoy). El SW cachea solo estáticos; `/api` y `/uploads` van siempre a red.
+
 ## Login demo
 
 | Email | Contraseña |
