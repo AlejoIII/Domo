@@ -14,6 +14,8 @@ export default defineConfig(({ mode }) => {
     resolve: { alias: { '@': path.resolve(__dirname, './src') } },
     server: {
       port: 5173,
+      // Túneles / previews (p. ej. trycloudflare.com) además de localhost
+      allowedHosts: true,
       proxy: {
         '/api': apiProxy,
         '/uploads': apiProxy,
